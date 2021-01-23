@@ -20,6 +20,12 @@ TOOL_VERSION_IDENTIFIER = 'VERSION'
 TPDCC_DCCS_NAMESPACE = 'tpDcc.dccs'
 
 
+class Axis(object):
+    X = 'x'
+    Y = 'y'
+    Z = 'z'
+
+
 class Environment(object):
     DEV = 'development'
     PROD = 'production'

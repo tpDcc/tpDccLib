@@ -42,7 +42,7 @@ class DccTool(object):
         super(DccTool, self).__init__()
 
         self._tool = list()
-        self._config = None
+        self._config = kwargs.pop('config', None)
         self._bootstrap = list()
         self._attacher = None
         self._client = None
@@ -273,10 +273,11 @@ class DccTool(object):
         # noinspection PyArgumentList
         self._attacher = attacher_class(
             id=tool_id, title=self.name, config=self.config, settings=self.settings,
-            show_on_initialize=False, frameless=self.is_frameless, dockable=True, toolset=toolset_inst)
+            show_on_initialize=False, frameless=self.is_frameless, dockable=True, toolset=toolset_inst,
+            icon=resources.icon(tool_config_dict.get('icon', 'tpdcc')))
 
         toolset_inst.set_attacher(self._attacher)
-        self._attacher.setWindowIcon(toolset_inst.get_icon())
+        # self._attacher.setWindowIcon(toolset_inst.get_icon())
         self._attacher.setWindowTitle('{} - {}'.format(self._attacher.windowTitle(), self.VERSION))
         if tool_size:
             self._attacher.resize(tool_size[0], tool_size[1])
@@ -337,7 +338,7 @@ class DccTool(object):
         Internal function that sets the configuration of the tool
         """
 
-        self._config = configs.get_tool_config(self.ID, self.PACKAGE)
+        self._config = self._config or configs.get_tool_config(self.ID, self.PACKAGE)
 
     def _launch(self, *args, **kwargs):
         """

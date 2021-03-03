@@ -257,7 +257,7 @@ class DccClient(object):
         if tool_id:
             config_dict = configs.get_tool_config(tool_id) or dict() if tool_id else dict()
             supported_dccs = config_dict.get(
-                'supported_dccs', dict()) if config_dict else kwargs.get('supported_dccs', dict())
+                'supported_dccs', dict()) if config_dict else dict()
 
         # If no port if given, we check which DCCs are running the user machine and we try to connect
         # to those ports

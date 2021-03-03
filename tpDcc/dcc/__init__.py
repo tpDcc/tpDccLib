@@ -117,6 +117,16 @@ def is_nuke():
 
 
 # =================================================================================================================
+# GENERAL CLASSES
+# =================================================================================================================
+
+class MirrorPlane(object):
+    YZ = [-1, 1, 1]
+    XZ = [1, -1, 1]
+    XY = [1, 1, -1]
+
+
+# =================================================================================================================
 # GENERAL
 # =================================================================================================================
 
@@ -328,6 +338,26 @@ def fit_view(animation=True):
 def refresh_viewport():
     """
     Refresh current DCC viewport
+    """
+
+    pass
+
+
+@dcc.reroute
+@decorators.abstractmethod
+def refresh_viewport():
+    """
+    Refresh current DCC viewport
+    """
+
+    pass
+
+
+@dcc.reroute
+@decorators.abstractmethod
+def refresh_all_viewport():
+    """
+    Refresh all DCC viewports
     """
 
     pass
@@ -1940,6 +1970,34 @@ def get_mirror_name(name, center_patterns=None, left_patterns=None, right_patter
 
 @dcc.reroute
 @decorators.abstractmethod
+def get_mirror_axis(name, mirror_plane):
+    """
+    Returns mirror axis of the given node name
+    :param name: str
+    :param mirror_plane: str, mirror plane ("YZ", "XY", "XZ")
+    :return: str
+    """
+
+    pass
+
+
+@dcc.reroute
+@decorators.abstractmethod
+def is_axis_mirrored(source_node, target_node, axis, mirror_plane):
+    """
+    Returns whether or not given nodes axis are mirrored
+    :param source_node: str
+    :param target_node: str
+    :param axis: list(int)
+    :param mirror_plane: str
+    :return: bool
+    """
+
+    pass
+
+
+@dcc.reroute
+@decorators.abstractmethod
 def get_color_of_side(side='C', sub_color=False):
     """
     Returns override color of the given side
@@ -2332,6 +2390,17 @@ def change_namespace(old_namespace, new_namespace):
 
 @dcc.reroute
 @decorators.abstractmethod
+def get_current_time():
+    """
+    Returns current scene time
+    :return: int
+    """
+
+    pass
+
+
+@dcc.reroute
+@decorators.abstractmethod
 def new_scene(force=True, do_save=True):
     """
     Creates a new DCC scene
@@ -2383,6 +2452,19 @@ def open_file(file_path, force=True):
 def import_file(file_path, force=True, **kwargs):
     """
     Imports given file into current DCC scene
+    :param file_path: str
+    :param force: bool
+    :return:
+    """
+
+    pass
+
+
+@dcc.reroute
+@decorators.abstractmethod
+def merge_file(file_path, force=True, **kwargs):
+    """
+    Merges given file into current DCC scene
     :param file_path: str
     :param force: bool
     :return:
@@ -2657,6 +2739,85 @@ def clean_scene():
 # TRANSFORMS
 # =================================================================================================================
 
+
+@dcc.reroute
+@decorators.abstractmethod
+def convert_translation(translation):
+    """
+    Converts given translation into a valid translation to be used with tpDcc
+    NOTE: tpDcc uses Y up coordinate axes as the base reference axis
+    :param translation: list(float, float, float)
+    :return: list(float, float, float)
+    """
+
+    pass
+
+
+@dcc.reroute
+@decorators.abstractmethod
+def convert_dcc_translation(translation):
+    """
+    Converts given tpDcc translation into a translation that DCC can manage
+    NOTE: tpDcc uses Y up coordinate axes as the base reference axis
+    :param translation: list(float, float, float)
+    :return: list(float, float, float)
+    """
+
+    pass
+
+
+@dcc.reroute
+@decorators.abstractmethod
+def convert_rotation(rotation):
+    """
+    Converts given rotation into a valid rotation to be used with tpDcc
+    NOTE: tpDcc uses Y up coordinate axes as the base reference axis
+    :param rotation: list(float, float, float)
+    :return: list(float, float, float)
+    """
+
+    pass
+
+
+@dcc.reroute
+@decorators.abstractmethod
+def convert_dcc_rotation(rotation):
+    """
+    Converts given rotation into a rotation that DCC can manage
+    NOTE: tpDcc uses Y up coordinate axes as the base reference axis
+    :param rotation: list(float, float, float)
+    :return: list(float, float, float)
+    """
+
+    pass
+
+
+@dcc.reroute
+@decorators.abstractmethod
+def convert_scale(scale):
+    """
+    Converts given scale into a valid rotation to be used with tpDcc
+    NOTE: tpDcc uses Y up coordinate axes as the base reference axis
+    :param scale: list(float, float, float)
+    :return: list(float, float, float)
+    """
+
+    pass
+
+
+@dcc.reroute
+@decorators.abstractmethod
+def convert_dcc_scale(scale):
+    """
+    Converts given scale into a scale that DCC can manage
+    NOTE: tpDcc uses Y up coordinate axes as the base reference axis
+    :param scale: list(float, float, float)
+    :return: list(float, float, float)
+    """
+
+    pass
+
+
 @dcc.reroute
 @decorators.abstractmethod
 def get_up_axis_name():
@@ -2917,6 +3078,19 @@ def get_closest_transform(source_transform, targets):
     :param source_transform: str, name of the transform to test distance to
     :param targets: list<str>, list of targets to test distance against
     :return: str, name of the target in targets that is closest to source transform
+    """
+
+    pass
+
+
+@dcc.reroute
+@decorators.abstractmethod
+def distance_between_transforms(source_transform, target_transform):
+    """
+    Returns the total distance between given transform nodes
+    :param source_transform: str, name of the source transform node
+    :param target_transform: str, name of the target transform node
+    :return: float, total distance between both nodes
     """
 
     pass
@@ -4441,6 +4615,28 @@ def clear_skin_weights(skin_node):
 
 @dcc.reroute
 @decorators.abstractmethod
+def get_valid_attribute_types():
+    """
+    Returns a list of valid attribute types in current DCC
+    :return: list(str)
+    """
+
+    pass
+
+
+@dcc.reroute
+@decorators.abstractmethod
+def get_valid_blendable_attribute_types():
+    """
+    Returns a list of valid blendable attribute types in current DCC
+    :return: list(str)
+    """
+
+    pass
+
+
+@dcc.reroute
+@decorators.abstractmethod
 def attribute_default_value(node, attribute_name):
     """
     Returns default value of the attribute in the given node
@@ -4686,6 +4882,32 @@ def is_attribute_connected_to_attribute(source_node, source_attribute_name, targ
     :param source_attribute_name: str
     :param target_node: str
     :param target_attribute_name: str
+    :return: bool
+    """
+
+    pass
+
+
+@dcc.reroute
+@decorators.abstractmethod
+def get_minimum_attribute_value_exists(node, attribute_name):
+    """
+    Returns whether or not minimum value for given attribute is defined
+    :param node: str
+    :param attribute_name: str
+    :return: bool
+    """
+
+    pass
+
+
+@dcc.reroute
+@decorators.abstractmethod
+def get_maximum_attribute_value_exists(node, attribute_name):
+    """
+    Returns whether or not maximum value for given attribute is defined
+    :param node: str
+    :param attribute_name: str
     :return: bool
     """
 
@@ -5417,7 +5639,7 @@ def store_world_matrix_to_attribute(node, attribute_name='origMatrix', **kwargs)
 
 @dcc.reroute
 @decorators.abstractmethod
-def list_connections(node, attribute_name):
+def list_connections(node, attribute_name, **kwargs):
     """
     List the connections of the given out attribute in given node
     :param node: str
@@ -6042,6 +6264,28 @@ def set_active_frame_range(start_frame, end_frame):
     pass
 
 
+@dcc.reroute
+@decorators.abstractmethod
+def is_auto_keyframe_enabled():
+    """
+    Returns whether or not auto keyframe mode is enabled
+    :return: bool
+    """
+
+    pass
+
+
+@dcc.reroute
+@decorators.abstractmethod
+def set_auto_keyframe_enabled(flag):
+    """
+    Enables/Disables auto keyframe mode
+    :param flag: bool
+    """
+
+    pass
+
+
 # =================================================================================================================
 # CLUSTERS
 # =================================================================================================================
@@ -6349,6 +6593,22 @@ def shot_camera(shot_node):
     Returns camera associated given node
     :param shot_node: str
     :return: str
+    """
+
+    pass
+
+
+# =================================================================================================================
+# HUMAN IK (HIK)
+# =================================================================================================================
+
+
+@dcc.reroute
+@decorators.abstractmethod
+def get_scene_hik_characters():
+    """
+    Returns all HumanIK characters in current scene
+    :return: list(str)
     """
 
     pass

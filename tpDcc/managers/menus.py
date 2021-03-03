@@ -9,8 +9,8 @@ import logging
 from functools import partial
 
 from tpDcc import dcc
+from tpDcc.managers import resources, tools, configs
 from tpDcc.libs.python import python
-from tpDcc.managers import resources, tools
 from tpDcc.libs.qt.core import menu
 from tpDcc.libs.qt.managers import toolsets
 
@@ -18,7 +18,7 @@ _MENUS = dict()
 _MENU_NAMES = dict()
 _OBJECT_MENU_NAMES = dict()
 
-LOGGER = logging.getLogger('tpDcc-core')
+logger = logging.getLogger('tpDcc-core')
 
 
 def get_menu(menu_name, package_name=None):
@@ -60,7 +60,7 @@ def create_main_menu(package_name, force_creation=True):
     main_win = dcc.get_main_window()
     parent_menu_bar = main_win.menuBar() if main_win else None
     if not parent_menu_bar:
-        LOGGER.warning(
+        logger.warning(
             'Impossible to create Tools main menu for "{}" because not found menu bar to attach menu to!'.format(
                 package_name))
         return None
@@ -99,11 +99,11 @@ def create_menus(package_name, dev=False):
 
             menu_item_ui = item_info.get('ui', None)
             if not menu_item_ui:
-                LOGGER.warning('Menu Item "{}" has not a ui specified!. Skipping ...'.format(menu_item_id))
+                logger.warning('Menu Item "{}" has not a ui specified!. Skipping ...'.format(menu_item_id))
                 return
             menu_item_command = item_info.get('command', None)
             if not menu_item_command:
-                LOGGER.warning(
+                logger.warning(
                     'Menu Item "{}" does not defines a command to execute. Skipping ...'.format(menu_item_id))
                 return
             menu_item_language = item_info.get('language', 'python')
@@ -134,19 +134,17 @@ def create_menus(package_name, dev=False):
             tool_id = item_info.get('id', None)
             tool_type = item_info.get('type', 'tool')
 
-            tool_data = tools.ToolsManager().get_tool_data_from_id(tool_id)
-            if tool_data is None:
-                LOGGER.warning('Menu : Failed to find Tool: {}, type {}'.format(tool_id, tool_type))
-                return
-
-            tool_config = tool_data['config']
+            # NOTE: Here we don't pass the package for now. If we pass a package, for example, tpRigTooklit, tpDcc
+            # packages will not be added to the menu
+            # TODO: Fix this
+            tool_config = configs.get_tool_config(tool_id)
             if not tool_config:
                 return
 
-            tool_menu_ui_data = tool_data['config'].data.get('menu_ui', {})
+            tool_menu_ui_data = tool_config.data.get('menu_ui', {})
             tool_icon_name = tool_menu_ui_data.get('icon', '')
             if not tool_icon_name:
-                tool_icon_name = tool_data['config'].data.get('icon', None)
+                tool_icon_name = tool_config.data.get('icon', None)
             if not tool_icon_name:
                 tool_icon_name = 'tpDcc'
             tool_icon = resources.icon(tool_icon_name)
@@ -169,7 +167,7 @@ def create_menus(package_name, dev=False):
             if icon:
                 pass
 
-            tagged_action.tags = set(tool_data['config'].data.get('tags', []))
+            tagged_action.tags = set(tool_config.data.get('tags', []))
 
             parent.addAction(tagged_action)
 
@@ -222,7 +220,7 @@ def create_menus(package_name, dev=False):
 
     main_menu = create_main_menu(package_name=package_name)
     if not main_menu:
-        LOGGER.warning('Impossible to create main menu for "{}"'.format(package_name))
+        logger.warning('Impossible to create main menu for "{}"'.format(package_name))
         return False
 
     toolset_menus = toolsets.ToolsetsManager().toolset_menu(package_name=package_name)
@@ -266,7 +264,7 @@ def remove_previous_menus(package_name=None, parent=None):
     with proper objectName
     """
 
-    LOGGER.info('Closing menus for: {}'.format(package_name))
+    logger.info('Closing menus for: {}'.format(package_name))
 
     deleted_menus = list()
     parent = parent or dcc.get_main_window()

@@ -7,8 +7,6 @@ Module that contains class that defines DCC libraries
 
 from __future__ import print_function, division, absolute_import
 
-import os
-
 
 class DccLibrary(object):
 
@@ -55,4 +53,3 @@ class DccLibrary(object):
             'creator': 'Tomas Poveda',
             'tooltip': ''
         }
-

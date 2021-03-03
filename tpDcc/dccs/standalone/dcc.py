@@ -306,18 +306,152 @@ def save_file_dialog(title, start_directory=None, pattern=None):
 
     return QFileDialog.getSaveFileName(None, title, start_directory, pattern)[0]
 
+# =================================================================================================================
+# NAMING
+# =================================================================================================================
 
-# def new_scene(force=True, do_save=True):
-#     """
-#     Creates a new DCC scene
-#     :param force: bool, True if we want to save the scene without any prompt dialog
-#     :param do_save: bool, True if you want to save the current scene before creating new scene
-#     :return:
-#     """
-#
-#     return None
-#
-#
+
+def get_allowed_characters():
+    """
+    Returns regular expression of allowed characters in current DCC
+    :return: str
+    """
+
+    return 'A-Za-z0-9_. /+*<>=|-'
+
+
+def node_name(node):
+    """
+    Returns the name of the given node
+    :param node: str
+    :return: str
+    """
+
+    return node
+
+
+def node_short_name(node, **kwargs):
+    """
+    Returns short name of the given node
+    :param node: str
+    :return: str
+    """
+
+    return node
+
+
+# =================================================================================================================
+# SCENE
+# =================================================================================================================
+
+def new_scene(force=True, do_save=True):
+    """
+    Creates a new DCC scene
+    :param force: bool, True if we want to save the scene without any prompt dialog
+    :param do_save: bool, True if you want to save the current scene before creating new scene
+    :return:
+    """
+
+    return None
+
+
+def scene_is_modified():
+    """
+    Returns whether or not current opened DCC file has been modified by the user or not
+    :return: True if current DCC file has been modified by the user; False otherwise
+    :rtype: bool
+    """
+
+    return True
+
+
+def new_file(force=True):
+    """
+    Creates a new file
+    :param force: bool
+    """
+
+    pass
+
+
+def open_file(file_path, force=True):
+    """
+    Open file in given path
+    :param file_path: str
+    :param force: bool
+    """
+
+    pass
+
+
+def import_file(file_path, force=True, **kwargs):
+    """
+    Imports given file into current DCC scene
+    :param file_path: str
+    :param force: bool
+    :return:
+    """
+
+    pass
+
+
+def merge_file(file_path, force=True, **kwargs):
+    """
+    Merges given file into current DCC scene
+    :param file_path: str
+    :param force: bool
+    :return:
+    """
+
+    pass
+
+
+def reference_file(file_path, force=True, **kwargs):
+    """
+    References given file into current DCC scene
+    :param file_path: str
+    :param force: bool
+    :param kwargs: keyword arguments
+    :return:
+    """
+
+    pass
+
+
+def import_obj_file(file_path, force=True, **kwargs):
+    """
+    Imports OBJ file into current DCC scene
+    :param file_path: str
+    :param force: bool
+    :param kwargs: keyword arguments
+    :return:
+    """
+
+    pass
+
+
+def import_fbx_file(file_path, force=True, **kwargs):
+    """
+    Imports FBX file into current DCC scene
+    :param file_path: str
+    :param force: bool
+    :param kwargs: keyword arguments
+    :return:
+    """
+
+    pass
+
+
+def scene_name():
+    """
+    Returns the name of the current scene
+    :return: str
+    """
+
+    return ''
+
+
+
 # def object_exists(node):
 #     """
 #     Returns whether given object exists or not
@@ -640,6 +774,55 @@ def set_control_color(control_node, color=None):
     """
 
     pass
+
+# =================================================================================================================
+# ANIMATION
+# =================================================================================================================
+
+def get_start_frame():
+    """
+    Returns current start frame
+    :return: int
+    """
+
+    return 0
+
+
+def get_end_frame():
+    """
+    Returns current end frame
+    :return: int
+    """
+
+    return 0
+
+
+def get_current_frame():
+    """
+    Returns current frame set in time slider
+    :return: int
+    """
+
+    return 0
+
+
+def set_current_frame(frame):
+    """
+    Sets the current frame in time slider
+    :param frame: int
+    """
+
+    pass
+
+
+def get_time_slider_range():
+    """
+    Return the time range from Maya time slider
+    :return: list<int, int>
+    """
+
+    return [0, 0]
+
 
 # =================================================================================================================
 # DECORATORS

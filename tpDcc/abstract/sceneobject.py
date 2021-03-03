@@ -83,4 +83,3 @@ class AbstractSceneObject(scenewrapper.AbstractSceneWrapper, object):
         """
 
         return dcc.node_is_hidden(self._dcc_native_object)
-

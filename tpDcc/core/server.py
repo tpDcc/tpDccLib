@@ -168,7 +168,6 @@ class DccServer(QObject, object):
 
         self._retrieved_data = json_data
 
-
     def _write(self, reply_dict):
 
         try:

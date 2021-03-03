@@ -451,7 +451,6 @@ def scene_name():
     return ''
 
 
-
 # def object_exists(node):
 #     """
 #     Returns whether given object exists or not
@@ -611,7 +610,6 @@ def scene_name():
 #     """
 #
 #     return False
-
 
 def selected_nodes(full_path=True, **kwargs):
     """
@@ -774,6 +772,7 @@ def set_control_color(control_node, color=None):
     """
 
     pass
+
 
 # =================================================================================================================
 # ANIMATION

@@ -20,61 +20,103 @@ from tpDcc.libs.qt.widgets import dialog
 class _MetaDialog(type):
 
     def __call__(cls, *args, **kwargs):
+        as_class = kwargs.pop('as_class', False)
         if dcc.is_maya():
             from tpDcc.dccs.maya.ui import dialog as maya_dialog
-            return type.__call__(maya_dialog.MayaDialog, *args, **kwargs)
+            if as_class:
+                return maya_dialog.MayaDialog
+            else:
+                return type.__call__(maya_dialog.MayaDialog, *args, **kwargs)
         else:
-            return type.__call__(dialog.BaseDialog, *args, **kwargs)
+            if as_class:
+                return dialog.BaseDialog
+            else:
+                return type.__call__(dialog.BaseDialog, *args, **kwargs)
 
 
 class _MetaColorDialog(type):
 
     def __call__(cls, *args, **kwargs):
+        as_class = kwargs.pop('as_class', False)
         if dcc.is_maya():
             from tpDcc.dccs.maya.ui import dialog as maya_dialog
-            return type.__call__(maya_dialog.MayaColorDialog, *args, **kwargs)
+            if as_class:
+                return maya_dialog.MayaColorDialog
+            else:
+                return type.__call__(maya_dialog.MayaColorDialog, *args, **kwargs)
         else:
-            return type.__call__(dialog.BaseColorDialog, *args, **kwargs)
+            if as_class:
+                return dialog.BaseColorDialog
+            else:
+                return type.__call__(dialog.BaseColorDialog, *args, **kwargs)
 
 
 class _MetaOpenFileDialog(type):
 
     def __call__(cls, *args, **kwargs):
+        as_class = kwargs.pop('as_class', False)
         if dcc.is_maya():
             from tpDcc.dccs.maya.ui import dialog as maya_dialog
-            return type.__call__(maya_dialog.MayaOpenFileDialog, *args, **kwargs)
+            if as_class:
+                return maya_dialog.MayaOpenFileDialog
+            else:
+                return type.__call__(maya_dialog.MayaOpenFileDialog, *args, **kwargs)
         else:
-            return type.__call__(dialog.BaseOpenFileDialog, *args, **kwargs)
+            if as_class:
+                return dialog.BaseOpenFileDialog
+            else:
+                return type.__call__(dialog.BaseOpenFileDialog, *args, **kwargs)
 
 
 class _MetaSaveFileDialog(type):
 
     def __call__(cls, *args, **kwargs):
+        as_class = kwargs.pop('as_class', False)
         if dcc.is_maya():
             from tpDcc.dccs.maya.ui import dialog as maya_dialog
-            return type.__call__(maya_dialog.MayaSaveFileDialog, *args, **kwargs)
+            if as_class:
+                return maya_dialog.MayaSaveFileDialog
+            else:
+                return type.__call__(maya_dialog.MayaSaveFileDialog, *args, **kwargs)
         else:
-            return type.__call__(dialog.BaseSaveFileDialog, *args, **kwargs)
+            if as_class:
+                return dialog.BaseSaveFileDialog
+            else:
+                return type.__call__(dialog.BaseSaveFileDialog, *args, **kwargs)
 
 
 class _MetaSelectFolderDialog(type):
 
     def __call__(cls, *args, **kwargs):
+        as_class = kwargs.pop('as_class', False)
         if dcc.is_maya():
             from tpDcc.dccs.maya.ui import dialog as maya_dialog
-            return type.__call__(maya_dialog.MayaSelectFolderDialog, *args, **kwargs)
+            if as_class:
+                return maya_dialog.MayaSelectFolderDialog
+            else:
+                return type.__call__(maya_dialog.MayaSelectFolderDialog, *args, **kwargs)
         else:
-            return type.__call__(dialog.BaseSaveFileDialog, *args, **kwargs)
+            if as_class:
+                return dialog.BaseSelectFolderDialog
+            else:
+                return type.__call__(dialog.BaseSelectFolderDialog, *args, **kwargs)
 
 
 class _MetaNativeFolderDialog(type):
 
     def __call__(cls, *args, **kwargs):
+        as_class = kwargs.pop('as_class', False)
         if dcc.is_maya():
             from tpDcc.dccs.maya.ui import dialog as maya_dialog
-            return type.__call__(maya_dialog.MayaNativeDialog, *args, **kwargs)
+            if as_class:
+                return maya_dialog.MayaNativeDialog
+            else:
+                return type.__call__(maya_dialog.MayaNativeDialog, *args, **kwargs)
         else:
-            return type.__call__(dialog.BaseNativeDialog, *args, **kwargs)
+            if as_class:
+                return dialog.BaseNativeDialog
+            else:
+                return type.__call__(dialog.BaseNativeDialog, *args, **kwargs)
 
 
 @decorators.add_metaclass(_MetaDialog)

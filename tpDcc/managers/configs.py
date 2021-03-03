@@ -18,7 +18,7 @@ except ImportError:
     pass
 
 from tpDcc import dcc
-from tpDcc.core import config
+from tpDcc.core import consts, config
 from tpDcc.managers import libs
 from tpDcc.libs.python import folder
 
@@ -53,23 +53,25 @@ def register_package_path(package_name, module_name, config_path, environment='d
                     environment, package_name, config_path))
             return
 
-    dcc_name = dcc.get_name()
-    dcc_version = dcc.get_version_name()
+    # dcc_name = dcc.get_name()
+    # dcc_version = dcc.get_version_name()
 
     base_config = os.path.join(config_path, module_name)
-    dcc_config_path = os.path.join(config_path, dcc_name, module_name)
-    dcc_version_config_path = os.path.join(config_path, dcc_name, dcc_version, module_name)
+    # dcc_config_path = os.path.join(config_path, dcc_name, module_name)
+    # dcc_version_config_path = os.path.join(config_path, dcc_name, dcc_version, module_name)
 
     if package_name not in _PACKAGE_CONFIGS:
         _PACKAGE_CONFIGS[package_name] = dict()
     if module_name not in _PACKAGE_CONFIGS[package_name]:
         _PACKAGE_CONFIGS[package_name][module_name] = dict()
 
-    _PACKAGE_CONFIGS[package_name][module_name][environment] = {
-        'base': '{}{}'.format(base_config, config_extension),
-        'dcc': '{}{}'.format(dcc_config_path, config_extension),
-        'dcc_version': '{}{}'.format(dcc_version_config_path, config_extension)
-    }
+    _PACKAGE_CONFIGS[package_name][module_name][environment] = '{}{}'.format(base_config, config_extension)
+
+    # _PACKAGE_CONFIGS[package_name][module_name][environment] = {
+    #     'base': '{}{}'.format(base_config, config_extension),
+    #     'dcc': '{}{}'.format(dcc_config_path, config_extension),
+    #     'dcc_version': '{}{}'.format(dcc_version_config_path, config_extension)
+    # }
 
 
 def register_package_configs(package_name, config_path, config_extension=None):
@@ -87,7 +89,7 @@ def register_package_configs(package_name, config_path, config_extension=None):
     if not config_path or not os.path.isdir(config_path):
         return
 
-    for environment in ['development', 'production']:
+    for environment in [consts.Environment.DEV, consts.Environment.PROD]:
         config_files = folder.get_files(
             config_path, full_path=False, recursive=True, pattern='*{}'.format(config_extension))
         if not config_files:
@@ -184,43 +186,33 @@ def get_config(config_name, package_name=None, root_package_name=None, environme
     return new_config
 
 
-def get_config_from_path(config_path, environment=None, extra_data=None):
-    if not config_path or not os.path.isfile(config_path):
+def get_tool_config(tool_id, package_name=None):
+
+    # Import here to avoid circular imports
+    from tpDcc.managers import tools
+
+    package_name = package_name or tool_id.replace('.', '-').split('-')[0]
+
+    tool_class = tools.ToolsManager().get_plugin_from_id(tool_id, package_name=package_name)
+    if not tool_class:
         return None
 
-    if extra_data is None:
-        extra_data = dict()
+    config_dict = tool_class.config_dict() or dict()
 
-    config_name = os.path.basename(config_path)
-    # config_directory = os.path.dirname(config_path)
-    # config_data = {'path': config_directory}
-    # extra_data.update(config_data)
-
-    new_config = config.DccConfig(config_name=config_name, environment=environment, data=extra_data)
-
-    return new_config
-
-
-def get_tool_config(library_id, package_name=None):
-    tool_data = libs.LibsManager().get_tool_data_from_id(library_id, package_name=package_name)
-    if not tool_data:
-        return None
-
-    if 'dcc_config' in tool_data and tool_data['dcc_config']:
-        return tool_data['dcc_config']
-
-    return tool_data.get('config', None)
+    return get_config(tool_id, package_name=package_name, extra_data=config_dict)
 
 
 def get_library_config(library_id, package_name=None):
-    library_data = libs.LibsManager().get_library_data_from_id(library_id, package_name=package_name)
-    if not library_data:
+
+    package_name = package_name or library_id.replace('.', '-').split('-')[0]
+
+    library_class = libs.LibsManager().get_plugin_from_id(library_id, package_name=package_name)
+    if not library_class:
         return None
 
-    if 'dcc_config' in library_data and library_data['dcc_config']:
-        return library_data['dcc_config']
+    config_dict = library_class.config_dict() or dict()
 
-    return library_data.get('config', None)
+    return get_config(library_id, package_name=package_name, config_dict=config_dict)
 
 
 def get_all_package_configs(package_name, root_package_name=None, environment=None, skip_non_existent=True):
@@ -251,12 +243,17 @@ def get_all_package_configs(package_name, root_package_name=None, environment=No
         packages_to_loop = [root_package_name]
     packages_to_loop.append(package_name)
 
+    # TODO: We should be able to indicate which client we want to use (by passing a tool ID)
+    dcc_name = dcc.client().get_name()
+    dcc_version = dcc.client().get_version_name()
+
     for package_name in packages_to_loop:
         for module_name, env_dicts in _PACKAGE_CONFIGS[package_name].items():
-            for env_name, module_dict in env_dicts.items():
-                base_path = module_dict.get('base', None)
-                dcc_path = module_dict.get('dcc', None)
-                dcc_version_path = module_dict.get('dcc_version', None)
+            for env_name, base_path in env_dicts.items():
+                config_path = os.path.dirname(base_path)
+                config_name = os.path.basename(base_path)
+                dcc_path = os.path.join(config_path, dcc_name, config_name)
+                dcc_version_path = os.path.join(config_path, dcc_name, dcc_version, config_name)
                 found_paths = list()
 
                 if environment and environment.lower() != env_name.lower():

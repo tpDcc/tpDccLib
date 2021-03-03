@@ -62,10 +62,10 @@ class Dccs(object):
     executables = {
         Maya: {osplatform.Platforms.Windows: 'maya.exe'},
         Max: {osplatform.Platforms.Windows: '3dsmax.exe'},
-        MotionBuilder: {},
-        Houdini: {},
+        MotionBuilder: {osplatform.Platforms.Windows: 'motionbuilder.exe'},
+        Houdini: {osplatform.Platforms.Windows: 'houdinifx.exe'},
         Nuke: {},
-        Unreal: {osplatform.Platforms.Windows: 'unreal.exe'}
+        Unreal: {osplatform.Platforms.Windows: 'UE4Editor.exe'}
     }
 
 

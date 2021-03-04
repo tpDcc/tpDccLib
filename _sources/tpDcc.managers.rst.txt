@@ -9,8 +9,10 @@ Submodules
 
    tpDcc.managers.callbacks
    tpDcc.managers.configs
+   tpDcc.managers.libs
    tpDcc.managers.logs
    tpDcc.managers.menus
+   tpDcc.managers.plugins
    tpDcc.managers.resources
    tpDcc.managers.tools
 

@@ -1,0 +1,7 @@
+tpDcc.core.reroute module
+=========================
+
+.. automodule:: tpDcc.core.reroute
+   :members:
+   :undoc-members:
+   :show-inheritance:

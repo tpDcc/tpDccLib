@@ -1,7 +1,0 @@
-tpDcc.abstract.dcc module
-=========================
-
-.. automodule:: tpDcc.abstract.dcc
-   :members:
-   :undoc-members:
-   :show-inheritance:

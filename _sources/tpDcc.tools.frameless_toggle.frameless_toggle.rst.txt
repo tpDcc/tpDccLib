@@ -1,7 +1,0 @@
-tpDcc.tools.frameless\_toggle.frameless\_toggle module
-======================================================
-
-.. automodule:: tpDcc.tools.frameless_toggle.frameless_toggle
-   :members:
-   :undoc-members:
-   :show-inheritance:

@@ -1,0 +1,20 @@
+tpDcc.dcc package
+=================
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   tpDcc.dcc.dialog
+   tpDcc.dcc.progressbar
+   tpDcc.dcc.window
+
+Module contents
+---------------
+
+.. automodule:: tpDcc.dcc
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,13 +1,13 @@
 tpDcc.dccs.standalone package
 =============================
 
-Subpackages
------------
+Submodules
+----------
 
 .. toctree::
    :maxdepth: 4
 
-   tpDcc.dccs.standalone.core
+   tpDcc.dccs.standalone.dcc
 
 Module contents
 ---------------

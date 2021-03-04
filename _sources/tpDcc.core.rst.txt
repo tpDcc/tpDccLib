@@ -8,17 +8,18 @@ Submodules
    :maxdepth: 4
 
    tpDcc.core.client
+   tpDcc.core.command
    tpDcc.core.config
    tpDcc.core.consts
-   tpDcc.core.data
    tpDcc.core.dcc
    tpDcc.core.exceptions
+   tpDcc.core.library
    tpDcc.core.node
    tpDcc.core.options
    tpDcc.core.plugin
    tpDcc.core.project
+   tpDcc.core.reroute
    tpDcc.core.scene
-   tpDcc.core.scripts
    tpDcc.core.server
    tpDcc.core.tool
 

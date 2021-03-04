@@ -1,7 +1,0 @@
-tpDcc.register module
-=====================
-
-.. automodule:: tpDcc.register
-   :members:
-   :undoc-members:
-   :show-inheritance:

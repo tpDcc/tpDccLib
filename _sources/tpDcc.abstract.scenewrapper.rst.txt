@@ -1,0 +1,7 @@
+tpDcc.abstract.scenewrapper module
+==================================
+
+.. automodule:: tpDcc.abstract.scenewrapper
+   :members:
+   :undoc-members:
+   :show-inheritance:

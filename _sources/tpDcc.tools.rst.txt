@@ -1,14 +1,6 @@
 tpDcc.tools package
 ===================
 
-Subpackages
------------
-
-.. toctree::
-   :maxdepth: 4
-
-   tpDcc.tools.frameless_toggle
-
 Module contents
 ---------------
 

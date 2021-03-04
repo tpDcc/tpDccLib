@@ -1,0 +1,7 @@
+tpDcc.abstract.sceneobject module
+=================================
+
+.. automodule:: tpDcc.abstract.sceneobject
+   :members:
+   :undoc-members:
+   :show-inheritance:

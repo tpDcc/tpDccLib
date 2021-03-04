@@ -9,6 +9,7 @@ Subpackages
 
    tpDcc.abstract
    tpDcc.core
+   tpDcc.dcc
    tpDcc.dccs
    tpDcc.libs
    tpDcc.managers
@@ -22,7 +23,6 @@ Submodules
    :maxdepth: 4
 
    tpDcc.loader
-   tpDcc.register
 
 Module contents
 ---------------

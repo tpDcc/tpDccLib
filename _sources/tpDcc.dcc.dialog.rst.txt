@@ -1,0 +1,7 @@
+tpDcc.dcc.dialog module
+=======================
+
+.. automodule:: tpDcc.dcc.dialog
+   :members:
+   :undoc-members:
+   :show-inheritance:

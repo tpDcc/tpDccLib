@@ -8,10 +8,14 @@ Submodules
    :maxdepth: 4
 
    tpDcc.abstract.callback
-   tpDcc.abstract.dcc
+   tpDcc.abstract.dialog
    tpDcc.abstract.menu
    tpDcc.abstract.progressbar
+   tpDcc.abstract.scene
+   tpDcc.abstract.sceneobject
+   tpDcc.abstract.scenewrapper
    tpDcc.abstract.shelf
+   tpDcc.abstract.window
 
 Module contents
 ---------------

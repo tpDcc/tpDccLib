@@ -1,0 +1,7 @@
+tpDcc.dcc.window module
+=======================
+
+.. automodule:: tpDcc.dcc.window
+   :members:
+   :undoc-members:
+   :show-inheritance:

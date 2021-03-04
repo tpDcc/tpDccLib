@@ -30,7 +30,6 @@ def init(dev=False):
     Initializes module
     :param dev: bool, Whether tpDcc-core is initialized in dev mode or not
     """
-    
     os.environ['TPDCC_DEV'] = str(dev) if dev else ''
     logger = create_logger(dev=dev)
 

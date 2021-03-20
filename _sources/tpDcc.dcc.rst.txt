@@ -7,6 +7,7 @@ Submodules
 .. toctree::
    :maxdepth: 4
 
+   tpDcc.dcc.callback
    tpDcc.dcc.dialog
    tpDcc.dcc.progressbar
    tpDcc.dcc.window

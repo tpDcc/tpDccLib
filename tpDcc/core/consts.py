@@ -60,6 +60,25 @@ class ObjectTypes(object):
     Biped = 18
 
 
+class CallbackTypes(object):
+    Shutdown = 'Shutdown'
+    Tick = 'Tick'
+    ScenePreCreated = 'ScenePreCreated'
+    ScenePreCreated = 'ScenePreCreated'
+    ScenePostCreated = 'ScenePostCreated'
+    SceneNewRequested = 'SceneNewRequested'
+    SceneNewFinished = 'SceneNewFinished'
+    SceneSaveRequested = 'SceneSaveRequested'
+    SceneSaveFinished = 'SceneSaveFinished'
+    SceneOpenRequested = 'SceneOpenRequested'
+    SceneOpenFinished = 'SceneOpenFinished'
+    UserPropertyPreChanged = 'UserPropertyPreChanged'
+    UserPropertyPostChanged = 'UserPropertyPostChanged'
+    NodeSelect = 'NodeSelect'
+    NodeAdded = 'NodeAdded'
+    NodeDeleted = 'NodeDeleted'
+
+
 class UnitSystem(object):
     Inches = 0
     Feet = 1

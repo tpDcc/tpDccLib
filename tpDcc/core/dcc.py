@@ -70,21 +70,21 @@ class Dccs(object):
 
 
 class DccCallbacks(object):
-    Shutdown = ('Shutdown', {'type': 'simple'})
-    Tick = ('Tick', {'type': 'simple'})
-    ScenePreCreated = ('ScenePreCreated', {'type': 'simple'})
-    ScenePostCreated = ('ScenePreCreated', {'type': 'simple'})
-    SceneNewRequested = ('SceneNewRequested', {'type': 'simple'})
-    SceneNewFinished = ('SceneNewFinished', {'type': 'simple'})
-    SceneSaveRequested = ('SceneSaveRequested', {'type': 'simple'})
-    SceneSaveFinished = ('SceneSaveFinished', {'type': 'simple'})
-    SceneOpenRequested = ('SceneOpenRequested', {'type': 'simple'})
-    SceneOpenFinished = ('SceneOpenFinished', {'type': 'simple'})
-    UserPropertyPreChanged = ('UserPropertyPreChanged', {'type': 'filter'})
-    UserPropertyPostChanged = ('UserPropertyPostChanged', {'type': 'filter'})
-    NodeSelect = ('NodeSelect', {'type': 'filter'})
-    NodeAdded = ('NodeAdded', {'type': 'filter'})
-    NodeDeleted = ('NodeDeleted', {'type': 'filter'})
+    Shutdown = (consts.CallbackTypes.Shutdown, {'type': 'simple'})
+    Tick = (consts.CallbackTypes.Tick, {'type': 'simple'})
+    ScenePreCreated = (consts.CallbackTypes.ScenePreCreated, {'type': 'simple'})
+    ScenePostCreated = (consts.CallbackTypes.ScenePostCreated, {'type': 'simple'})
+    SceneNewRequested = (consts.CallbackTypes.SceneNewRequested, {'type': 'simple'})
+    SceneNewFinished = (consts.CallbackTypes.SceneNewFinished, {'type': 'simple'})
+    SceneSaveRequested = (consts.CallbackTypes.SceneSaveRequested, {'type': 'simple'})
+    SceneSaveFinished = (consts.CallbackTypes.SceneSaveFinished, {'type': 'simple'})
+    SceneOpenRequested = (consts.CallbackTypes.SceneOpenRequested, {'type': 'simple'})
+    SceneOpenFinished = (consts.CallbackTypes.SceneOpenFinished, {'type': 'simple'})
+    UserPropertyPreChanged = (consts.CallbackTypes.UserPropertyPreChanged, {'type': 'filter'})
+    UserPropertyPostChanged = (consts.CallbackTypes.UserPropertyPostChanged, {'type': 'filter'})
+    NodeSelect = (consts.CallbackTypes.NodeSelect, {'type': 'filter'})
+    NodeAdded = (consts.CallbackTypes.NodeAdded, {'type': 'filter'})
+    NodeDeleted = (consts.CallbackTypes.NodeDeleted, {'type': 'filter'})
 
 
 def dcc_port(base_port, dcc_name=None):

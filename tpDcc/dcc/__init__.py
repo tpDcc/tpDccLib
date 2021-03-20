@@ -1561,6 +1561,18 @@ def list_relatives(
 
 @dcc.reroute
 @decorators.abstractmethod
+def list_transforms(full_path=True):
+    """
+    List all transforms in current scene
+    :param full_path:
+    :return: list(str)
+    """
+
+    pass
+
+
+@dcc.reroute
+@decorators.abstractmethod
 def node_inherits_transform(node):
     """
     Returns whether or not given node inherits its parent transforms

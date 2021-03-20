@@ -72,9 +72,9 @@ class AbstractCallback(object):
             self._shutdown_notifier = shutdown_notifier
             self._shutdown_token = self._shutdown_notifier.register(self._shutdown)
 
-    def __del__(self):
-        if self._notifier:
-            self._shutdown([])
+    # def __del__(self):
+    #     if self._notifier:
+    #         self._shutdown([])
 
     def _connect(self, fn):
         """
@@ -383,7 +383,7 @@ class SimpleCallback(AbstractCallback):
 
 class FilterCallback(AbstractCallback, object):
     """
-    Provides a implementatino of an Abstractcallback interface that allows the filtering of the callback
+    Provides a implementation of an Abstractcallback interface that allows the filtering of the callback
     generated from the notifier. It maintains a many-to-one relationship between listeners and notifier
     """
 
@@ -559,15 +559,15 @@ class CallbackInstance(object):
         if self._callback:
             self._callback.register(self._notify)
 
-    def __del__(self):
-        """
-        Destructor
-        """
-
-        if self._callback:
-            self._callback.unregister(self._notify)
-        self._callback = None
-        self._notify = None
+    # def __del__(self):
+    #     """
+    #     Destructor
+    #     """
+    #
+    #     if self._callback:
+    #         self._callback.unregister(self._notify)
+    #     self._callback = None
+    #     self._notify = None
 
     @property
     def callback(self):

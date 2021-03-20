@@ -13,7 +13,7 @@ import logging.config
 import tpDcc.config
 from tpDcc.core import dcc as core_dcc
 from tpDcc.libs.python import contexts
-from tpDcc.managers import configs, libs, tools
+from tpDcc.managers import configs, libs, tools, callbacks
 from tpDcc.libs.qt import loader as qt_loader
 from tpDcc.libs.qt.managers import toolsets
 from tpDcc import toolsets as dcc_toolsets
@@ -65,7 +65,7 @@ def init(dev=False):
     #     toolsets.ToolsetsManager().load_registered_toolsets(PACKAGE, tools_to_load=tools_to_load)
 
     # Callbacks
-    # callbacks.CallbacksManager.initialize()
+    callbacks.CallbacksManager.initialize()
 
 
 def create_logger(dev=False):

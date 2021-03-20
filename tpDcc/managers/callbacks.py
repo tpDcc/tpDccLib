@@ -7,21 +7,25 @@ Module that contains base callbackManager class
 
 from __future__ import print_function, division, absolute_import
 
-import sys
 import logging
 
 from tpDcc import dcc
+from tpDcc.core import dcc as core_dcc
 from tpDcc.abstract import callback
+from tpDcc.dcc import callback as dcc_callback
+from tpDcc.libs.python import decorators
 
-LOGGER = logging.getLogger('tpDcc-core')
+logger = logging.getLogger('tpDcc-core')
 
 
+@decorators.add_metaclass(decorators.Singleton)
 class CallbacksManager(object):
     """
     Static class used to manage all callbacks instances
     """
 
     _initialized = False
+    _callbacks = dict()
 
     @classmethod
     def initialize(cls):
@@ -37,40 +41,41 @@ class CallbacksManager(object):
         }
 
         try:
-            shutdown_type = getattr(tpDcc.Callbacks, 'ShutdownCallback')
+            shutdown_type = getattr(dcc_callback.Callback(), 'ShutdownCallback')
         except AttributeError:
             shutdown_type = None
 
-        for callback_name in tpDcc.callbacks():
+        for callback_name in core_dcc.callbacks():
 
             # Get callback type from tpDcc.DccCallbacks
-            n_type = getattr(tpDcc.DccCallbacks, callback_name)[1]['type']
+            n_type = getattr(core_dcc.DccCallbacks, callback_name)[1]['type']
             if n_type == 'simple':
                 callback_type = callback.SimpleCallback
             elif n_type == 'filter':
                 callback_type = callback.FilterCallback
             else:
-                LOGGER.warning('Callback Type "{}" is not valid! Using Simplecallback instead ...'.format(n_type))
+                logger.warning('Callback Type "{}" is not valid! Using Simplecallback instead ...'.format(n_type))
                 callback_type = callback.SimpleCallback
 
             # We extract callback types from the specific registered callbacks module
-            if not hasattr(tpDcc, 'Callbacks'):
-                LOGGER.warning('DCC {} has no callbacks registered!'.format(dcc.get_name()))
+            if not dcc_callback.Callback():
+                logger.warning('DCC {} has no callbacks registered!'.format(dcc.get_name()))
                 return
 
-            callback_class = getattr(tpDcc.Callbacks, '{}Callback'.format(callback_name), None)
+            callback_class = getattr(dcc_callback.Callback(), '{}Callback'.format(callback_name), None)
             if not callback_class:
                 callback_class = default_callbacks.get(callback_name, callback.ICallback)
-                LOGGER.warning(
+                logger.warning(
                     'Dcc {} does not provides an ICallback for {}Callback. Using {} instead'.format(
                         dcc.get_name(), callback_name, callback_class.__name__))
 
-            new_callback = getattr(tpDcc, callback_name, None)
+            new_callback = CallbacksManager._callbacks.get(callback_name, None)
             if new_callback:
                 new_callback.cleanup()
-            # register.register_class(callback_name, callback_type(callback_class, shutdown_type), skip_store=True)
 
-            LOGGER.debug('Creating Callback "{}" of type "{}" ...'.format(callback_name, callback_class))
+            CallbacksManager._callbacks[callback_name] = callback_type(callback_class, shutdown_type)
+
+            logger.debug('Creating Callback "{}" of type "{}" ...'.format(callback_name, callback_class))
 
         cls._initialized = True
 
@@ -86,8 +91,8 @@ class CallbacksManager(object):
         if type(callback_type) in [list, tuple]:
             callback_type = callback_type[0]
 
-        if callback_type in sys.modules[tpDcc.__name__].__dict__.keys():
-            sys.modules[tpDcc.__name__].__dict__[callback_type].register(fn, owner)
+        if callback_type in CallbacksManager._callbacks:
+            CallbacksManager._callbacks[callback_type].register(fn, owner)
 
     @classmethod
     def unregister(cls, callback_type, fn):
@@ -100,8 +105,8 @@ class CallbacksManager(object):
         if type(callback_type) in [list, tuple]:
             callback_type = callback_type[0]
 
-        if callback_type in sys.modules[tpDcc.__name__].__dict__.keys():
-            sys.modules[tpDcc.__name__].__dict__[callback_type].unregister(fn)
+        if callback_type in CallbacksManager._callbacks:
+            CallbacksManager._callbacks[callback_type].unregister(fn)
 
     @classmethod
     def unregister_owner_callbacks(cls, owner):
@@ -113,10 +118,8 @@ class CallbacksManager(object):
         if not cls._initialized:
             return
 
-        for k, v in sys.modules[tpDcc.__name__].__dict__.items():
-            if isinstance(
-                    v, callback.AbstractCallback) or ('Callback' in v.__class__.__name__ and hasattr(v, 'cleanup')):
-                v.unregister_owner_callbacks(owner=owner)
+        for callback_name, register_callback in CallbacksManager._callbacks.items():
+            register_callback.unregister_owner_callbacks(owner=owner)
 
     @classmethod
     def cleanup(cls):
@@ -128,10 +131,11 @@ class CallbacksManager(object):
         # if not cls._initialized:
         #     return
 
-        for k, v in sys.modules[tpDcc.__name__].__dict__.items():
-            if isinstance(
-                    v, callback.AbstractCallback) or ('Callback' in v.__class__.__name__ and hasattr(v, 'cleanup')):
-                v.cleanup()
-                sys.modules[tpDcc.__name__].__dict__.pop(k)
+        callbacks_to_clean = list()
+        for callback_name, register_callback in CallbacksManager._callbacks.items():
+            register_callback.cleanup()
+            callbacks_to_clean.append(callback_name)
+        for callback_name in callbacks_to_clean:
+            CallbacksManager._callbacks.pop(callback_name)
 
         cls._initialized = False

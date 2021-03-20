@@ -136,12 +136,11 @@ class ToolsManager(plugin.PluginFactory):
     # TOOLS
     # ============================================================================================================
 
-    def launch_tool_by_id(self, tool_id, package_name=None, attacher_class=None, dev=False, *args, **kwargs):
+    def launch_tool_by_id(self, tool_id, package_name=None, dev=False, *args, **kwargs):
         """
         Launches tool of a specific package by its ID
         :param tool_id: str, tool ID
         :param package_name: str
-        :param attacher_class: class
         :param dev: bool
         :param args: tuple, arguments to pass to the tool execute function
         :param kwargs: dict, keyword arguments to pas to the tool execute function
@@ -170,7 +169,6 @@ class ToolsManager(plugin.PluginFactory):
                 tool_ui = tool_data['tool']
                 self._hub_tools.append(tool_ui)
             else:
-                self.close_tool(tool_id)
                 tool_inst._launch(*args, **kwargs)
                 self._loaded_tools[tool_id] = tool_inst
 

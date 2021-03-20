@@ -650,7 +650,6 @@ def dock_widget(widget, *args, **kwargs):
     :param kwargs:
     :return:
     """
-    
     raise NotImplementedError()
 
 

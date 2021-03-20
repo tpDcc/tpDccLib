@@ -22,14 +22,14 @@ from collections import OrderedDict
 
 from Qt.QtCore import Signal, QObject
 
+from tpDcc import dcc
 import tpDcc.loader
 import tpDcc.config
-from tpDcc import dcc
-from tpDcc.core import dcc as core_dcc
-from tpDcc.managers import configs
 import tpDcc.libs.python
 import tpDcc.libs.resources
 import tpDcc.libs.qt.loader
+from tpDcc.core import server, dcc as core_dcc
+from tpDcc.managers import configs
 from tpDcc.libs.python import python, osplatform, process, path as path_utils
 
 if sys.version_info[0] == 2:
@@ -38,16 +38,10 @@ if sys.version_info[0] == 2:
 LOGGER = logging.getLogger('tpDcc-core')
 
 
-class DccClientSignals(QObject, object):
-    dccDisconnected = Signal()
-
-
-class DccClient(object):
+class BaseClient(QObject):
 
     PORT = 17344
     HEADER_SIZE = 10
-
-    signals = DccClientSignals()
 
     class Status(object):
         ERROR = 'error'
@@ -55,21 +49,19 @@ class DccClient(object):
         SUCCESS = 'success'
         UNKNOWN = 'unknown'
 
-    def __init__(self, timeout=20, tool_id=None):
-        self._tool_id = tool_id or None
+    def __init__(self, timeout=20):
+        super(BaseClient, self).__init__()
+
         self._timeout = timeout
-        self._ports = core_dcc.dcc_ports(self.__class__.PORT)
         self._port = None
         self._discard_count = 0
         self._server = None
         self._connected = False
         self._status = dict()
-        self._client_sockets = dict()
-        self._running_dccs = list()
 
     def __getattribute__(self, name):
         try:
-            attr = super(DccClient, self).__getattribute__(name)
+            attr = super(BaseClient, self).__getattribute__(name)
         except AttributeError:
             def new_fn(*args, **kwargs):
                 cmd = {
@@ -102,6 +94,251 @@ class DccClient(object):
     # =================================================================================================================
 
     @classmethod
+    def create(cls, *args, **kwargs):
+
+        client = cls()
+
+        return client
+
+    @classmethod
+    def create_and_connect_to_server(cls, tool_id, *args, **kwargs):
+
+        client = cls.create(*args, **kwargs)
+
+        client._connect()
+
+        return client
+
+    def set_server(self, server):
+        self._server = server
+
+    def is_valid_reply(self, reply_dict):
+        if not reply_dict:
+            LOGGER.debug('Invalid reply')
+            return False
+
+        if not reply_dict['success']:
+            LOGGER.error('{} failed: {}'.format(reply_dict['cmd'], reply_dict['msg']))
+            return False
+
+        self._status = reply_dict.pop(
+            'status', None) or {'msg': self.get_status_message(), 'level': self.get_status_level()}
+
+        return True
+
+    def ping(self):
+        cmd = {
+            'cmd': 'ping'
+        }
+
+        reply = self.send(cmd)
+
+        if not self.is_valid_reply(reply):
+            return False
+
+        return True
+
+    def get_status_message(self):
+        """
+        Returns current client status message
+        :return: str
+        """
+
+        return self._status.get('msg', '')
+
+    def get_status_level(self):
+        """
+        Returns current client status level
+        :return: str
+        """
+
+        return self._status.get('level', self.Status.UNKNOWN)
+
+    def set_status(self, status_message, status_level):
+        """
+        Sets current client status
+        :param status_message: str
+        :param status_level: str
+        """
+
+        self._status = {'msg': str(status_message), 'level': status_level}
+
+    def send(self, cmd_dict):
+        json_cmd = json.dumps(cmd_dict)
+
+        # If we use execute the tool inside DCC we execute client/server in same process. We can just launch the
+        # function in the server
+        if self._server:
+            reply_json = self._server._process_data(cmd_dict)
+            if not reply_json:
+                self._status = None
+                return {'success': False}
+            return json.loads(reply_json)
+        else:
+            if not self._connected:
+                return self.send_command(cmd_dict)
+
+            message = list()
+            message.append('{0:10d}'.format(len(json_cmd.encode())))    # header (10 bytes)
+            message.append(json_cmd)
+
+            try:
+                msg_str = ''.join(message)
+                self._client_socket.sendall(msg_str.encode())
+            except OSError as exc:
+                LOGGER.debug(exc)
+                return None
+            except Exception:
+                LOGGER.exception(traceback.format_exc())
+                return None
+
+            res = self.recv()
+            self._status = res.pop('status', dict())
+
+            return res
+
+    def send_command(self, cmd_dict):
+        pass
+
+    def recv(self):
+        total_data = list()
+        reply_length = 0
+        bytes_remaining = self.__class__.HEADER_SIZE
+
+        start_time = time.time()
+        while time.time() - start_time < self._timeout:
+            try:
+                data = self._client_socket.recv(bytes_remaining)
+            except Exception as exc:
+                time.sleep(0.01)
+                print(exc)
+                continue
+
+            if data:
+                total_data.append(data)
+                bytes_remaining -= len(data)
+                if bytes_remaining <= 0:
+                    for i in range(len(total_data)):
+                        total_data[i] = total_data[i].decode()
+
+                    if reply_length == 0:
+                        header = ''.join(total_data)
+                        reply_length = int(header)
+                        bytes_remaining = reply_length
+                        total_data = list()
+                    else:
+                        if self._discard_count > 0:
+                            self._discard_count -= 1
+                            return self.recv()
+
+                        reply_json = ''.join(total_data)
+                        return json.loads(reply_json)
+
+        self._discard_count += 1
+
+        # If timeout is checked, before raising timeout we make sure that all remaining data is processed
+        data = None
+        try:
+            data = self._client_socket.recv(bytes_remaining)
+        except Exception as exc:
+            time.sleep(0.01)
+            print(exc)
+        if data:
+            total_data.append(data)
+            bytes_remaining -= len(data)
+            if bytes_remaining <= 0:
+                for i in range(len(total_data)):
+                    total_data[i] = total_data[i].decode()
+
+                if reply_length == 0:
+                    header = ''.join(total_data)
+                    reply_length = int(header)
+                else:
+                    self._discard_count -= 1
+                    reply_json = ''.join(total_data)
+                    return json.loads(reply_json)
+
+        raise RuntimeError('Timeout waiting for response')
+
+    def _disconnect(self):
+        try:
+            self._client_socket.close()
+        except Exception:
+            traceback.print_exc()
+            self._status = {'msg': 'Error while disconnecting client', 'level': self.Status.ERROR}
+            return False
+
+        return True
+
+    # =================================================================================================================
+    # INTERNAL
+    # =================================================================================================================
+
+    def _connect(self):
+
+        self._port = self.PORT
+
+        try:
+            self._client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self._client_socket.connect(('localhost', self._port))
+            # self._client_socket.setblocking(False)
+        except ConnectionRefusedError as exc:
+            # LOGGER.warning(exc)
+            self._status = {'msg': 'Client connection was refused.', 'level': self.Status.WARNING}
+            self._connected = False
+            return False
+        except Exception:
+            LOGGER.exception(traceback.format_exc())
+            self._status = {'msg': 'Error while connecting client', 'level': self.Status.ERROR}
+            self._connected = False
+            return False
+
+        self._connected = True
+
+        return True
+
+
+class DccClient(BaseClient):
+    dccDisconnected = Signal()
+    callbackSended = Signal(object, str)
+
+    def __init__(self, timeout=20, tool_id=None):
+        super(DccClient, self).__init__(timeout=timeout)
+
+        self._tool_id = tool_id or None
+        self._port = core_dcc.dcc_port(self.__class__.PORT)
+
+        self._client_sockets = dict()
+        self._running_dccs = list()
+
+    # =================================================================================================================
+    # OVERRIDES
+    # =================================================================================================================
+
+    @classmethod
+    def create(cls, tool_id, *args, **kwargs):
+
+        # If a client with given ID is already registered, we return it
+        client = dcc.client(tool_id, only_clients=True)
+        if client:
+            return client
+
+        client = cls(tool_id=tool_id)
+
+        return client
+
+    def _disconnect(self):
+        valid = super(DccClient, self).disconnect()
+        if valid:
+            self.dccDisconnected.emit()
+
+        return valid
+
+    # =================================================================================================================
+    # BASE
+    # =================================================================================================================
+
+    @classmethod
     def _register_client(cls, tool_id, client):
         """
         Internal function that registers given client in global Dcc clients variable
@@ -120,25 +357,7 @@ class DccClient(object):
         dcc._CLIENTS[tool_id] = weakref.ref(client)
 
     @classmethod
-    def create(cls, tool_id, *args, **kwargs):
-
-        # If a client with given ID is already registered, we return it
-        client = dcc.client(tool_id, only_clients=True)
-        if client:
-            return client
-
-        client = cls(tool_id=tool_id)
-
-        return client
-
-    @classmethod
     def create_and_connect_to_server(cls, tool_id, *args, **kwargs):
-
-        # def _connect_client():
-        #     valid_connect = client.connect()
-        #     if not valid_connect:
-        #         cls._register_client(tool_id, client)
-        #         return False
 
         client = cls.create(tool_id, *args, **kwargs)
 
@@ -164,8 +383,8 @@ class DccClient(object):
                     pass
                 return None
         else:
-            client.connect()
-            client.update_client(tool_id=tool_id, **kwargs)
+            client._connect()
+        #     client.update_client(tool_id=tool_id, **kwargs)
 
         return client
 
@@ -215,10 +434,7 @@ class DccClient(object):
         if tool_id:
             DccClient._register_client(tool_id, self)
 
-    def set_server(self, server):
-        self._server = server
-
-    def connect(self, port=-1):
+    def _connect(self):
 
         def _connect(_port):
             try:
@@ -227,7 +443,7 @@ class DccClient(object):
                 # self._client_socket.setblocking(False)
             except ConnectionRefusedError as exc:
                 # LOGGER.warning(exc)
-                self._status = {'msg': 'Client connection was refused.', 'level': self.Status.ERROR}
+                self._status = {'msg': 'Client connection was refused.', 'level': self.Status.WARNING}
                 self._connected = False
                 return False
             except Exception:
@@ -235,7 +451,6 @@ class DccClient(object):
                 self._status = {'msg': 'Error while connecting client', 'level': self.Status.ERROR}
                 self._connected = False
                 return False
-
             return True
 
         if self._server:
@@ -243,14 +458,11 @@ class DccClient(object):
             self._connected = True
             return True
 
-        # If we pass a port, we just connect to it
-        if port > 0:
-            self._port = port
-            self._connected = _connect(port)
-            return self._connected
-
-        self._port = self.PORT
-        _connect(self._port)
+        # # If we pass a port, we just connect to it
+        # if port > 0:
+        #     self._port = port
+        #     self._connected = _connect(port)
+        #     return self._connected
 
         supported_dccs = None
         tool_id = self._tool_id
@@ -280,170 +492,45 @@ class DccClient(object):
         else:
             for dcc_name in self._running_dccs:
                 self._port = core_dcc.dcc_port(self.PORT, dcc_name=dcc_name)
+                self._create_callbacks_server()
                 valid_connect = _connect(self._port)
                 if valid_connect:
                     self._connected = True
-                    return True
+                    break
 
         return self._connected
 
-    def disconnect(self):
-        try:
-            self._client_socket.close()
-            self.signals.dccDisconnected.emit()
-        except Exception:
-            traceback.print_exc()
-            self._status = {'msg': 'Error while disconnecting client', 'level': self.Status.ERROR}
-            return False
-
-        return True
-
-    def send(self, cmd_dict):
-        json_cmd = json.dumps(cmd_dict)
-
-        # If we use execute the tool inside DCC we execute client/server in same process. We can just launch the
-        # function in the server
-        if self._server:
-            reply_json = self._server._process_data(cmd_dict)
-            if not reply_json:
-                self._status = None
-                return {'success': False}
-            return json.loads(reply_json)
-        else:
-            if not self._connected:
-                cmd = cmd_dict.pop('cmd', None)
-                if cmd and hasattr(dcc, cmd):
-                    try:
-                        res = getattr(dcc, cmd)(**cmd_dict)
-                    except TypeError:
-                        if python.is_python2():
-                            function_kwargs = inspect.getargspec(getattr(dcc, cmd))
-                            plugin_kwargs = function_kwargs.args
-                            if not function_kwargs:
-                                res = getattr(dcc, cmd)()
-                            else:
-                                valid_kwargs = dict()
-                                for kwarg_name, kwarg_value in cmd_dict.items():
-                                    if kwarg_name in plugin_kwargs:
-                                        valid_kwargs[kwarg_name] = kwarg_value
-                                res = getattr(dcc, cmd)(**valid_kwargs)
-                        else:
-                            function_signature = inspect.signature(getattr(dcc, cmd))
-                            if not function_signature.parameters:
-                                res = getattr(dcc, cmd)()
-                            else:
-                                valid_kwargs = dict()
-                                for kwarg_name, kwarg_value in function_signature.parameters.items():
-                                    if kwarg_name in cmd_dict:
-                                        valid_kwargs[kwarg_name] = cmd_dict[kwarg_name]
-                                res = getattr(dcc, cmd)(**valid_kwargs)
-                    if res is not None:
-                        return {'success': True, 'result': res}
-                return None
-
-            message = list()
-            message.append('{0:10d}'.format(len(json_cmd.encode())))    # header (10 bytes)
-            message.append(json_cmd)
-
+    def send_command(self, cmd_dict):
+        cmd = cmd_dict.pop('cmd', None)
+        if cmd and hasattr(dcc, cmd):
             try:
-                msg_str = ''.join(message)
-                self._client_socket.sendall(msg_str.encode())
-            except OSError as exc:
-                LOGGER.debug(exc)
-                return None
-            except Exception:
-                LOGGER.exception(traceback.format_exc())
-                return None
-
-            res = self.recv()
-            self._status = res.pop('status', dict())
-
-            return res
-
-    def recv(self):
-        total_data = list()
-        reply_length = 0
-        bytes_remaining = DccClient.HEADER_SIZE
-
-        start_time = time.time()
-        while time.time() - start_time < self._timeout:
-            try:
-                data = self._client_socket.recv(bytes_remaining)
-            except Exception as exc:
-                time.sleep(0.01)
-                print(exc)
-                continue
-
-            if data:
-                total_data.append(data)
-                bytes_remaining -= len(data)
-                if bytes_remaining <= 0:
-                    for i in range(len(total_data)):
-                        total_data[i] = total_data[i].decode()
-
-                    if reply_length == 0:
-                        header = ''.join(total_data)
-                        reply_length = int(header)
-                        bytes_remaining = reply_length
-                        total_data = list()
+                res = getattr(dcc, cmd)(**cmd_dict)
+            except TypeError:
+                if python.is_python2():
+                    function_kwargs = inspect.getargspec(getattr(dcc, cmd))
+                    plugin_kwargs = function_kwargs.args
+                    if not function_kwargs:
+                        res = getattr(dcc, cmd)()
                     else:
-                        if self._discard_count > 0:
-                            self._discard_count -= 1
-                            return self.recv()
-
-                        reply_json = ''.join(total_data)
-                        return json.loads(reply_json)
-
-        self._discard_count += 1
-
-        # If timeout is checked, before raising timeout we make sure that all remaining data is processed
-        try:
-            data = self._client_socket.recv(bytes_remaining)
-        except Exception as exc:
-            time.sleep(0.01)
-            print(exc)
-        if data:
-            total_data.append(data)
-            bytes_remaining -= len(data)
-            if bytes_remaining <= 0:
-                for i in range(len(total_data)):
-                    total_data[i] = total_data[i].decode()
-
-                if reply_length == 0:
-                    header = ''.join(total_data)
-                    reply_length = int(header)
+                        valid_kwargs = dict()
+                        for kwarg_name, kwarg_value in cmd_dict.items():
+                            if kwarg_name in plugin_kwargs:
+                                valid_kwargs[kwarg_name] = kwarg_value
+                        res = getattr(dcc, cmd)(**valid_kwargs)
                 else:
-                    self._discard_count -= 1
-                    reply_json = ''.join(total_data)
-                    return json.loads(reply_json)
+                    function_signature = inspect.signature(getattr(dcc, cmd))
+                    if not function_signature.parameters:
+                        res = getattr(dcc, cmd)()
+                    else:
+                        valid_kwargs = dict()
+                        for kwarg_name, kwarg_value in function_signature.parameters.items():
+                            if kwarg_name in cmd_dict:
+                                valid_kwargs[kwarg_name] = cmd_dict[kwarg_name]
+                        res = getattr(dcc, cmd)(**valid_kwargs)
+            if res is not None:
+                return {'success': True, 'result': res}
 
-        raise RuntimeError('Timeout waiting for response')
-
-    def is_valid_reply(self, reply_dict):
-        if not reply_dict:
-            LOGGER.debug('Invalid reply')
-            return False
-
-        if not reply_dict['success']:
-            LOGGER.error('{} failed: {}'.format(reply_dict['cmd'], reply_dict['msg']))
-            return False
-
-        self._status = reply_dict.pop(
-            'status', None) or {'msg': self.get_status_message(), 'level': self.get_status_level()}
-
-        return True
-
-    def ping(self):
-        cmd = {
-            'cmd': 'ping'
-        }
-
-        reply = self.send(cmd)
-
-        if not self.is_valid_reply(reply):
-            return False
-
-        return True
+        return None
 
     def update_paths(self):
 
@@ -636,16 +723,9 @@ class DccClient(object):
 
         return reply_dict['success']
 
-    def get_status_message(self):
-        return self._status.get('msg', '')
-
-    def get_status_level(self):
-        return self._status.get('level', self.Status.UNKNOWN)
-
-    def set_status(self, status_message, status_level):
-        self._status = {
-            'msg': str(status_message), 'level': status_level
-        }
+    # =================================================================================================================
+    # INTERNAL
+    # =================================================================================================================
 
     def _get_paths_to_update(self):
         """
@@ -666,8 +746,35 @@ class DccClient(object):
                 os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(tpDcc.libs.qt.loader.__file__)))))
         }
 
+    def _create_callbacks_server(self):
+        self._callbacks_server = server.CallbackServer(base_port=self._port or self.PORT, parent=self)
+        self._callbacks_server.callbackSended.connect(self.callbackSended.emit)
 
-class ExampleClient(DccClient, object):
+
+class CallbackClient(BaseClient):
+
+    def __init__(self, base_port, timeout=20):
+
+        self.PORT = base_port - len(core_dcc.Dccs.ALL)
+
+        super(CallbackClient, self).__init__(timeout=timeout)
+
+    def send_callback(self, value, callback_type):
+        cmd = {
+            'cmd': 'send_callback',
+            'value': value,
+            'callback_type': callback_type
+        }
+
+        reply = self.send(cmd)
+
+        if not self.is_valid_reply(reply):
+            return False
+
+        return True
+
+
+class ExampleClient(BaseClient):
 
     PORT = 17337
 
@@ -712,7 +819,7 @@ class ExampleClient(DccClient, object):
 
 if __name__ == '__main__':
     client = ExampleClient(timeout=10)
-    if client.connect():
+    if client._connect():
         print('Connected successfully!')
 
         print(client.ping())
@@ -720,7 +827,7 @@ if __name__ == '__main__':
         print(client.set_title('New Server Title'))
         print(client.sleep())
 
-        if client.disconnect():
+        if client._disconnect():
             print('Disconnected successfully!')
     else:
         print('Failed to connect')

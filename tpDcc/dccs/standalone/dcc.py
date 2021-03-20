@@ -703,6 +703,24 @@ def node_tpdcc_type(self, node, as_string=False):
     pass
 
 
+def root_node():
+    """
+    Returns DCC scene root node
+    :return: str
+    """
+
+    return None
+
+
+def node_exists(node_name):
+    """
+    Returns whether given object exists or not
+    :param node_name: str
+    :return: bool
+    """
+
+    return False
+
 # =================================================================================================================
 # JOINTS
 # =================================================================================================================

@@ -9,8 +9,6 @@ from __future__ import print_function, division, absolute_import
 
 import logging
 
-from Qt.QtWidgets import QDialogButtonBox, QFileDialog
-
 from tpDcc.core import dcc
 from tpDcc.libs.python import python, decorators
 
@@ -232,6 +230,7 @@ def confirm_dialog(title, message, button=None, cancel_button=None, default_butt
     """
 
     from tpDcc.libs.qt.widgets import messagebox
+    from Qt.QtWidgets import QDialogButtonBox
 
     new_buttons = None
     if button:
@@ -278,6 +277,8 @@ def select_file_dialog(title, start_directory=None, pattern=None):
     :return: str
     """
 
+    from Qt.QtWidgets import QFileDialog
+
     if not pattern:
         pattern = 'All Files (*.*)'
 
@@ -292,6 +293,8 @@ def select_folder_dialog(title, start_directory=None):
     :return: str
     """
 
+    from Qt.QtWidgets import QFileDialog
+
     return QFileDialog.getExistingDirectory(None, title, start_directory)
 
 
@@ -303,6 +306,8 @@ def save_file_dialog(title, start_directory=None, pattern=None):
     :param pattern: str
     :return: str
     """
+
+    from Qt.QtWidgets import QFileDialog
 
     return QFileDialog.getSaveFileName(None, title, start_directory, pattern)[0]
 

@@ -7,8 +7,6 @@ Module that contains constant definitions for tpDcc
 
 from __future__ import print_function, division, absolute_import
 
-from Qt.QtWidgets import QDialogButtonBox
-
 # =======~============ GENERAL
 PROJECTS_NAME = 'project.json'
 
@@ -101,13 +99,6 @@ class MaterialAttributeTypes(object):
 
 class MaterialTypes(object):
     Standard = 0
-
-
-class DialogResult(object):
-    Yes = QDialogButtonBox.Yes
-    No = QDialogButtonBox.No
-    Cancel = QDialogButtonBox.Cancel
-    Close = QDialogButtonBox.Close
 
 
 SIDE_PATTERNS = {

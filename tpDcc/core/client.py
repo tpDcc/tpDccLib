@@ -383,7 +383,7 @@ class DccClient(BaseClient):
                     pass
                 return None
         else:
-            client._connect()
+            client._connect(**kwargs)
         #     client.update_client(tool_id=tool_id, **kwargs)
 
         return client
@@ -434,7 +434,7 @@ class DccClient(BaseClient):
         if tool_id:
             DccClient._register_client(tool_id, self)
 
-    def _connect(self):
+    def _connect(self, **kwargs):
 
         def _connect(_port):
             try:
@@ -471,32 +471,40 @@ class DccClient(BaseClient):
             supported_dccs = config_dict.get(
                 'supported_dccs', dict()) if config_dict else dict()
 
-        # If no port if given, we check which DCCs are running the user machine and we try to connect
-        # to those ports
-        self._running_dccs = list()
-        for dcc_name in core_dcc.Dccs.ALL:
-
-            if supported_dccs and dcc_name not in supported_dccs:
-                continue
-
-            process_name = core_dcc.Dccs.executables.get(dcc_name, dict()).get(osplatform.get_platform(), None)
-            if not process_name:
-                continue
-            process_running = process.check_if_process_is_running(process_name)
-            if not process_running:
-                continue
-            self._running_dccs.append(dcc_name)
-        if not self._running_dccs:
-            self._port = self.PORT
-            self._connected = _connect(self._port)
+        force_dcc = kwargs.get('dcc', None)
+        if force_dcc and force_dcc in supported_dccs:
+            self._port = core_dcc.dcc_port(self.PORT, dcc_name=force_dcc)
+            self._create_callbacks_server()
+            valid_connect = _connect(self._port)
+            if valid_connect:
+                self._connected = True
         else:
-            for dcc_name in self._running_dccs:
-                self._port = core_dcc.dcc_port(self.PORT, dcc_name=dcc_name)
-                self._create_callbacks_server()
-                valid_connect = _connect(self._port)
-                if valid_connect:
-                    self._connected = True
-                    break
+            # If no port if given, we check which DCCs are running the user machine and we try to connect
+            # to those ports
+            self._running_dccs = list()
+            for dcc_name in core_dcc.Dccs.ALL:
+
+                if supported_dccs and dcc_name not in supported_dccs:
+                    continue
+
+                process_name = core_dcc.Dccs.executables.get(dcc_name, dict()).get(osplatform.get_platform(), None)
+                if not process_name:
+                    continue
+                process_running = process.check_if_process_is_running(process_name)
+                if not process_running:
+                    continue
+                self._running_dccs.append(dcc_name)
+            if not self._running_dccs:
+                self._port = self.PORT
+                self._connected = _connect(self._port)
+            else:
+                for dcc_name in self._running_dccs:
+                    self._port = core_dcc.dcc_port(self.PORT, dcc_name=dcc_name)
+                    self._create_callbacks_server()
+                    valid_connect = _connect(self._port)
+                    if valid_connect:
+                        self._connected = True
+                        break
 
         return self._connected
 

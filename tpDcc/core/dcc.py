@@ -7,6 +7,8 @@ Module that contains DCC core functions an classes
 
 from __future__ import print_function, division, absolute_import
 
+import os
+import sys
 import logging
 import importlib
 from functools import wraps
@@ -124,7 +126,14 @@ def current_dcc():
             import unreal
             CURRENT_DCC = Dccs.Unreal
         except ImportError:
-            CURRENT_DCC = Dccs.Standalone
+            try:
+                if os.path.splitext(os.path.basename(sys.executable))[0].lower() == 'motionbuilder':
+                    import pyfbsdk
+                    CURRENT_DCC = Dccs.MotionBuilder
+                else:
+                    CURRENT_DCC = Dccs.Standalone
+            except ImportError:
+                CURRENT_DCC = Dccs.Standalone
 
     return CURRENT_DCC
 
@@ -148,12 +157,13 @@ def get_dcc_loader_module(package='tpDcc.dccs'):
     if not dcc_mod:
         try:
             import unreal
+            dcc_mod = importlib.import_module('{}.unreal.loader'.format(package))
+        except Exception:
             try:
-                dcc_mod = importlib.import_module('{}.unreal.loader'.format(package))
+                import pyfbsdk
+                dcc_mod = importlib.import_module('{}.mobu.loader'.format(package))
             except ImportError:
                 pass
-        except Exception:
-            pass
 
     return dcc_mod
 

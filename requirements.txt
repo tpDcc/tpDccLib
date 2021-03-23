@@ -10,3 +10,6 @@ Qt.py==1.3.3
 metayaml==0.26
 tpDcc-config
 tpDcc-libs-python
+
+-i https://pypi.anaconda.org/carlkl/simple
+numpy

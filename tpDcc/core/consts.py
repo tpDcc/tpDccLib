@@ -62,7 +62,6 @@ class CallbackTypes(object):
     Shutdown = 'Shutdown'
     Tick = 'Tick'
     ScenePreCreated = 'ScenePreCreated'
-    ScenePreCreated = 'ScenePreCreated'
     ScenePostCreated = 'ScenePostCreated'
     SceneNewRequested = 'SceneNewRequested'
     SceneNewFinished = 'SceneNewFinished'

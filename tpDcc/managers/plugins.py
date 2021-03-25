@@ -164,7 +164,7 @@ def register_plugin_instance(package_name, instance):
 
 def unregister_plugin_instance(instance):
     """
-    Internal function that unregister plugin instance
+    function that unregister plugin instance
     :param package_name: str
     :param instance: Tool
     """

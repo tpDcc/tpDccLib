@@ -2,9 +2,5 @@
 # tpDcc-core requirements file
 # ===================================================================
 Qt.py
-metayaml
 tpDcc-config
 tpDcc-libs-python
-
--i https://pypi.anaconda.org/carlkl/simple
-numpy

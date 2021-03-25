@@ -1,7 +1,0 @@
-tpDcc.dccs.standalone.dcc module
-================================
-
-.. automodule:: tpDcc.dccs.standalone.dcc
-   :members:
-   :undoc-members:
-   :show-inheritance:

@@ -9,9 +9,9 @@ from __future__ import print_function, division, absolute_import
 
 import os
 
-from Qt.QtCore import QFileInfo
-from Qt.QtWidgets import QApplication, QStyle, QFileIconProvider
-from Qt.QtGui import QIcon, QPixmap
+from tpDcc.vendors.Qt.QtCore import QFileInfo
+from tpDcc.vendors.Qt.QtWidgets import QApplication, QStyle, QFileIconProvider
+from tpDcc.vendors.Qt.QtGui import QIcon, QPixmap
 
 from tpDcc.libs.python import python, folder
 

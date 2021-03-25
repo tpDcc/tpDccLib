@@ -20,7 +20,7 @@ import importlib
 import traceback
 from collections import OrderedDict
 
-from Qt.QtCore import Signal, QObject
+from tpDcc.vendors.Qt.QtCore import Signal, QObject
 
 from tpDcc import dcc
 import tpDcc.loader

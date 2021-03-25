@@ -36,7 +36,7 @@ def init(dev=False):
     # Get DCC loader module
     dcc_loader_module = core_dcc.get_dcc_loader_module()
     logger.info('DCC loader module found: "{}"'.format(dcc_loader_module))
-    if dcc_loader_module:
+    if dcc_loader_module and hasattr(dcc_loader_module, 'init_dcc') and callable(dcc_loader_module.init_dcc):
         dcc_loader_module.init_dcc()
 
     # After that, we initialize Qt library (we must do it after tpDcc one because tpDcc-libs-qt depends on tpDcc-core)

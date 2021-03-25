@@ -11,8 +11,8 @@ import uuid
 import inspect
 import logging
 
-from tpDcc.vendors.Qt.QtCore import Qt, Signal, QSize, QEvent
-from tpDcc.vendors.Qt.QtWidgets import QWidget, QDockWidget, QGroupBox, QLabel, QLineEdit, QToolButton, QMenu
+from Qt.QtCore import Qt, Signal, QSize, QEvent
+from Qt.QtWidgets import QWidget, QDockWidget, QGroupBox, QLabel, QLineEdit, QToolButton, QMenu
 
 from tpDcc import dcc
 from tpDcc.managers import resources

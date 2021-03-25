@@ -10,7 +10,7 @@ from __future__ import print_function, division, absolute_import
 import os
 import logging
 
-from tpDcc.vendors.Qt.QtGui import QPixmap
+from Qt.QtGui import QPixmap
 
 from tpDcc.core import options, consts
 from tpDcc.managers import resources

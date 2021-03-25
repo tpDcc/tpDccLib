@@ -18,8 +18,8 @@ import importlib
 import threading
 from collections import OrderedDict
 
-from tpDcc.vendors.Qt.QtCore import Signal, QObject, QByteArray
-from tpDcc.vendors.Qt.QtNetwork import QTcpServer, QHostAddress, QTcpSocket
+from Qt.QtCore import Signal, QObject, QByteArray
+from Qt.QtNetwork import QTcpServer, QHostAddress, QTcpSocket
 
 from tpDcc import dcc
 from tpDcc.core import dcc as core_dcc
@@ -539,7 +539,7 @@ class ExampleServer(BaseServer):
 
 
 if __name__ == '__main__':
-    from tpDcc.vendors.Qt.QtWidgets import QApplication, QDialog, QPlainTextEdit
+    from Qt.QtWidgets import QApplication, QDialog, QPlainTextEdit
 
     app = QApplication(sys.argv)
     window = QDialog()

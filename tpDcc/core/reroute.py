@@ -15,7 +15,7 @@ from functools import wraps
 
 from tpDcc import dcc
 
-LOGGER = logging.getLogger('tpDcc-core')
+logger = logging.getLogger('tpDcc-core')
 
 REROUTE_CACHE = dict()
 
@@ -47,10 +47,10 @@ def reroute_factory(module_path=None, module_name=None):
                 try:
                     fn_mod = importlib.import_module(fn_mod_path)
                 except ImportError as exc:
-                    LOGGER.warning(
+                    logger.warning(
                         '{} | Function {} not implemented: {}'.format(current_dcc, fn_path, exc))
                 except Exception as exc:
-                    LOGGER.warning(
+                    logger.warning(
                         '{} | Error while rerouting function {}: {}'.format(current_dcc, fn_path, exc))
                 if fn_mod:
                     if hasattr(fn_mod, fn_name):

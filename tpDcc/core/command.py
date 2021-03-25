@@ -19,7 +19,7 @@ from tpDcc import dcc
 from tpDcc.core import exceptions
 from tpDcc.libs.python import decorators, osplatform, plugin
 
-LOGGER = logging.getLogger('tpDcc-core')
+logger = logging.getLogger('tpDcc-core')
 
 
 @decorators.add_metaclass(ABCMeta)
@@ -287,7 +287,7 @@ class BaseCommandRunner(object):
         except Exception:
             exc_type, exc_value, exc_trace = sys.exc_info()
             trace = traceback.format_exception(exc_type, exc_value, exc_trace)
-            LOGGER.exception(trace)
+            logger.exception(trace)
             raise
         finally:
             if not trace and command_to_run.is_undoable:
@@ -325,7 +325,7 @@ class BaseCommandRunner(object):
                 except Exception:
                     exc_type, exc_value, exc_trace = sys.exc_info()
                     trace = traceback.format_exception(exc_type, exc_value, exc_trace)
-                    LOGGER.exception(trace)
+                    logger.exception(trace)
                 finally:
                     if not trace and command_to_redo.is_undoable:
                         self._undo_stack.append(command_to_redo)

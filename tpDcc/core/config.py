@@ -9,7 +9,7 @@ from __future__ import print_function, division, absolute_import
 
 import logging
 
-LOGGER = logging.getLogger('tpDcc-core')
+logger = logging.getLogger('tpDcc-core')
 
 
 class ConfigAttribute(dict, object):
@@ -81,7 +81,7 @@ class DccConfig(object):
         """
 
         if not self._parsed_data:
-            LOGGER.warning('Configuration "{}" is empty for "{}"'.format(
+            logger.warning('Configuration "{}" is empty for "{}"'.format(
                 self._config_name, self._environment))
             return default
 
@@ -89,12 +89,12 @@ class DccConfig(object):
             orig_section = attr_section
             attr_section = self._parsed_data.get(attr_section, dict())
             if not attr_section:
-                LOGGER.warning('Configuration "{}" has no attribute "{}" in section "{}" for "{}"'.format(
+                logger.warning('Configuration "{}" has no attribute "{}" in section "{}" for "{}"'.format(
                     self._config_name, attr_name, orig_section, self._environment))
                 return default
             attr_value = attr_section.get(attr_name, None)
             if attr_value is None:
-                LOGGER.warning('Configuration "{}" has no attribute "{}" in section "{}" for "{}"'.format(
+                logger.warning('Configuration "{}" has no attribute "{}" in section "{}" for "{}"'.format(
                     self._config_name, attr_name, attr_section, self._environment))
                 return default
             return attr_value
@@ -106,7 +106,7 @@ class DccConfig(object):
                 attr_to_use = attr_name
             attr_value = self._parsed_data.get(attr_to_use, None)
             if attr_value is None:
-                LOGGER.warning('Configuration "{}" has no attribute "{}" for "{}"'.format(
+                logger.warning('Configuration "{}" has no attribute "{}" for "{}"'.format(
                     self._config_name, attr_to_use, self._environment))
                 return default
             return attr_value

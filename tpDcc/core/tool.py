@@ -20,7 +20,7 @@ from tpDcc.dcc import window
 from tpDcc.managers import resources, configs
 from tpDcc.libs.python import decorators, version, modules
 
-LOGGER = logging.getLogger('tpDcc-core')
+logger = logging.getLogger('tpDcc-core')
 
 
 class DccTool(object):
@@ -120,7 +120,7 @@ class DccTool(object):
                         cls.VERSION = version.SemanticVersion.from_pep440_string(
                             version_module.get_versions()['version'])
                 except Exception as exc:
-                    LOGGER.debug('Impossible to retrieve version for "{}" | {}'.format(cls.ID, exc))
+                    logger.debug('Impossible to retrieve version for "{}" | {}'.format(cls.ID, exc))
 
         return cls.VERSION
 
@@ -245,12 +245,12 @@ class DccTool(object):
         tool_id = tool_config_dict.get('id', None)
         tool_size = tool_config_dict.get('size', None)
         if not tool_name or not tool_id:
-            LOGGER.warning('Impossible to run tool "{}" with id: "{}"'.format(tool_name, tool_id))
+            logger.warning('Impossible to run tool "{}" with id: "{}"'.format(tool_name, tool_id))
             return None
 
         toolset_class = self.TOOLSET_CLASS
         if not toolset_class:
-            LOGGER.warning('Impossible to run tool! Tool "{}" does not define a toolset class.'.format(self.ID))
+            logger.warning('Impossible to run tool! Tool "{}" does not define a toolset class.'.format(self.ID))
             return None
         # toolset_data_copy = copy.deepcopy(self._config.data)
         # toolset_data_copy.update(toolset_class.CONFIG.data)
@@ -307,15 +307,15 @@ class DccTool(object):
         try:
             self.cleanup()
         except RuntimeError:
-            LOGGER.error('Failed to cleanup plugin: {}'.format(self.ID), exc_info=True)
+            logger.error('Failed to cleanup plugin: {}'.format(self.ID), exc_info=True)
         finally:
             try:
                 for widget in self._bootstrap:
                     widget.close()
             except RuntimeError:
-                LOGGER.error('Tool Widget already deleted: {}'.format(self._bootstrap), exc_info=True)
+                logger.error('Tool Widget already deleted: {}'.format(self._bootstrap), exc_info=True)
             except Exception:
-                LOGGER.error('Failed to remove tool widget: {}'.format(self._bootstrap), exc_info=True)
+                logger.error('Failed to remove tool widget: {}'.format(self._bootstrap), exc_info=True)
 
     # =================================================================================================================
     # INTERNAL

@@ -11,7 +11,7 @@ import logging
 
 from tpDcc.libs.python import settings, python
 
-LOGGER = logging.getLogger('tpDcc-core')
+logger = logging.getLogger('tpDcc-core')
 
 
 class OptionObject(object):
@@ -140,18 +140,18 @@ class OptionObject(object):
             if default is not None:
                 return default
             else:
-                LOGGER.warning(
+                logger.warning(
                     'Impossible to access option with proper format from {}'.format(self._option_settings.directory))
                 if self.has_option(name, group):
                     if group:
-                        LOGGER.warning('Could not find option: "{}" in group: "{}"'.format(name, group))
+                        logger.warning('Could not find option: "{}" in group: "{}"'.format(name, group))
                     else:
-                        LOGGER.warning('Could not find option: {}'.format(name))
+                        logger.warning('Could not find option: {}'.format(name))
                 return value
 
         value = self._format_option_value(value)
 
-        LOGGER.debug('Accessed Option - Option: "{}" | Group: "{}" | Value: "{}"'.format(name, group, value))
+        logger.debug('Accessed Option - Option: "{}" | Group: "{}" | Value: "{}"'.format(name, group, value))
 
         return value
 
@@ -170,7 +170,7 @@ class OptionObject(object):
             if key.endswith(name):
                 if return_first:
                     value = self._format_option_value(options_dict[key])
-                    LOGGER.debug('Accessed - Option: {}, value: {}'.format(name, options_dict[key]))
+                    logger.debug('Accessed - Option: {}, value: {}'.format(name, options_dict[key]))
                     return value
                 found[name] = options_dict[key]
 
@@ -260,7 +260,7 @@ class OptionObject(object):
                 if value.find(',') > -1:
                     new_value = value.split(',')
 
-        LOGGER.debug('Formatted value: {}'.format(new_value))
+        logger.debug('Formatted value: {}'.format(new_value))
 
         return new_value
 

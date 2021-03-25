@@ -18,7 +18,7 @@ from tpDcc import dcc
 from tpDcc.managers import resources
 from tpDcc.libs.qt.widgets import layouts
 
-LOGGER = logging.getLogger('tpDcc-core')
+logger = logging.getLogger('tpDcc-core')
 
 
 class BasePlugin(object):
@@ -380,7 +380,7 @@ def create_plugin_instance(plugin_class, already_registered_plugins=None, **kwar
     supported_softwares = plugin_class.SUPPORTED_SOFTWARES
     if 'any' not in supported_softwares:
         if dcc.get_name() not in supported_softwares:
-            LOGGER.warning(
+            logger.warning(
                 'Plugin {} is not suppported in current software: "{}"'.format(plugin_class.NAME, dcc.get_name()))
             return None
 

@@ -35,7 +35,7 @@ from tpDcc.libs.python import python, osplatform, process, path as path_utils
 if sys.version_info[0] == 2:
     from socket import error as ConnectionRefusedError
 
-LOGGER = logging.getLogger('tpDcc-core')
+logger = logging.getLogger('tpDcc-core')
 
 
 class BaseClient(QObject):
@@ -114,11 +114,11 @@ class BaseClient(QObject):
 
     def is_valid_reply(self, reply_dict):
         if not reply_dict:
-            LOGGER.debug('Invalid reply')
+            logger.debug('Invalid reply')
             return False
 
         if not reply_dict['success']:
-            LOGGER.error('{} failed: {}'.format(reply_dict['cmd'], reply_dict['msg']))
+            logger.error('{} failed: {}'.format(reply_dict['cmd'], reply_dict['msg']))
             return False
 
         self._status = reply_dict.pop(
@@ -186,10 +186,10 @@ class BaseClient(QObject):
                 msg_str = ''.join(message)
                 self._client_socket.sendall(msg_str.encode())
             except OSError as exc:
-                LOGGER.debug(exc)
+                logger.debug(exc)
                 return None
             except Exception:
-                LOGGER.exception(traceback.format_exc())
+                logger.exception(traceback.format_exc())
                 return None
 
             res = self.recv()
@@ -288,7 +288,7 @@ class BaseClient(QObject):
             self._connected = False
             return False
         except Exception:
-            LOGGER.exception(traceback.format_exc())
+            logger.exception(traceback.format_exc())
             self._status = {'msg': 'Error while connecting client', 'level': self.Status.ERROR}
             self._connected = False
             return False
@@ -375,7 +375,7 @@ class DccClient(BaseClient):
                     client.set_server(server)
                     client.update_client(tool_id=tool_id, **kwargs)
             except Exception as exc:
-                LOGGER.warning(
+                logger.warning(
                     'Impossible to launch tool server! Error while importing: {} >> {}'.format(dcc_mod_name, exc))
                 try:
                     server.close_connection()
@@ -429,7 +429,7 @@ class DccClient(BaseClient):
 
         msg = 'Connected to: {} {} ({})'.format(dcc_name, dcc_version, dcc_pid)
         self.set_status(msg, self.Status.SUCCESS)
-        LOGGER.info(msg)
+        logger.info(msg)
 
         if tool_id:
             DccClient._register_client(tool_id, self)
@@ -447,7 +447,7 @@ class DccClient(BaseClient):
                 self._connected = False
                 return False
             except Exception:
-                LOGGER.exception(traceback.format_exc())
+                logger.exception(traceback.format_exc())
                 self._status = {'msg': 'Error while connecting client', 'level': self.Status.ERROR}
                 self._connected = False
                 return False
@@ -577,7 +577,7 @@ class DccClient(BaseClient):
             dcc_name = core_dcc.Dccs.Unreal
         if not dcc_name:
             msg = 'Executable DCC {} is not supported!'.format(dcc_executable)
-            LOGGER.warning(msg)
+            logger.warning(msg)
             self._status = {'msg': msg, 'level': self.Status.WARNING}
             return False
 
@@ -588,16 +588,16 @@ class DccClient(BaseClient):
             try:
                 self._status = {
                     'msg': 'Error while connecting to Dcc: update dcc paths ...', 'severity': self.Status.ERROR}
-                LOGGER.error('FAILED IMPORT: {} -> {}'.format(str(module_name), str(traceback.format_exc())))
+                logger.error('FAILED IMPORT: {} -> {}'.format(str(module_name), str(traceback.format_exc())))
                 return False
             except Exception:
                 self._status = {
                     'msg': 'Error while connecting to Dcc: update dcc paths ...', 'severity': self.Status.ERROR}
-                LOGGER.error('FAILED IMPORT: {}'.format(module_name))
+                logger.error('FAILED IMPORT: {}'.format(module_name))
                 return False
         if not mod:
             msg = 'Impossible to import DCC specific module: {} ({})'.format(module_name, dcc_name)
-            LOGGER.warning(msg)
+            logger.warning(msg)
             self._status = {'msg': msg, 'severity': self.Status.WARNING}
             return False
 

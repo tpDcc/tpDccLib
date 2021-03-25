@@ -22,7 +22,7 @@ from tpDcc.core import consts, config
 from tpDcc.managers import libs
 from tpDcc.libs.python import folder
 
-LOGGER = logging.getLogger('tpDcc-core')
+logger = logging.getLogger('tpDcc-core')
 
 _PACKAGE_CONFIGS = dict()
 
@@ -42,13 +42,13 @@ def register_package_path(package_name, module_name, config_path, environment='d
         config_extension = '.{}'.format(config_extension)
 
     if not config_path or not os.path.isdir(config_path):
-        LOGGER.warning('Configuration Path "{}" for package "{}" does not exists!'.format(config_path, package_name))
+        logger.warning('Configuration Path "{}" for package "{}" does not exists!'.format(config_path, package_name))
         return
 
     if environment:
         config_path = os.path.join(config_path, environment.lower())
         if not os.path.isdir(config_path):
-            LOGGER.warning(
+            logger.warning(
                 'Configuration Folder for environment "{}" and package "{}" does not exists "{}"'.format(
                     environment, package_name, config_path))
             return
@@ -122,14 +122,14 @@ def get_config(config_name, package_name=None, root_package_name=None, environme
         """
 
         if not package_name:
-            LOGGER.error('Impossible to find configuration if package is not given!')
+            logger.error('Impossible to find configuration if package is not given!')
             return None
         if not config_name:
-            LOGGER.error('Impossible to to find configuration if configuration name is not given!')
+            logger.error('Impossible to to find configuration if configuration name is not given!')
             return None
 
         if package_name not in _PACKAGE_CONFIGS:
-            LOGGER.error('No configurations find for package "{}"'.format(package_name))
+            logger.error('No configurations find for package "{}"'.format(package_name))
             return None
 
         valid_package_configs = get_all_package_configs(
@@ -149,7 +149,7 @@ def get_config(config_name, package_name=None, root_package_name=None, environme
         try:
             config_data = metayaml.read(module_configs, config_dict)
         except Exception:
-            LOGGER.error('Error while reading configuration files: {} | {}'.format(
+            logger.error('Error while reading configuration files: {} | {}'.format(
                 module_configs, traceback.format_exc()))
         if not config_data:
             raise RuntimeError('Configuration file "{}" is empty!'.format(config_path))
@@ -228,13 +228,13 @@ def get_all_package_configs(package_name, root_package_name=None, environment=No
     module_paths = dict()
 
     if root_package_name and root_package_name not in _PACKAGE_CONFIGS:
-        LOGGER.warning(
+        logger.warning(
             'Impossible to retrieve package configs because root package: "{}" does not exist!'.format(
                 root_package_name))
         return module_paths
 
     if package_name not in _PACKAGE_CONFIGS:
-        LOGGER.warning(
+        logger.warning(
             'Impossible to retrieve package configs because package: "{}" does not exist!'.format(root_package_name))
         return module_paths
 

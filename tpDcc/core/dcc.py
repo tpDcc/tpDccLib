@@ -17,7 +17,7 @@ from collections import OrderedDict
 from tpDcc.core import consts
 from tpDcc.libs.python import osplatform
 
-LOGGER = logging.getLogger('tpDcc-core')
+logger = logging.getLogger('tpDcc-core')
 
 main = __import__('__main__')
 
@@ -150,7 +150,7 @@ def get_dcc_loader_module(package='tpDcc.dccs'):
             try:
                 dcc_mod = importlib.import_module(module_to_import)
             except ImportError:
-                LOGGER.warning('DCC loader module {} not found!'.format(module_to_import))
+                logger.warning('DCC loader module {} not found!'.format(module_to_import))
                 continue
             if dcc_mod:
                 break

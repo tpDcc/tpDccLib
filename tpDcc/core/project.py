@@ -16,7 +16,7 @@ from tpDcc.core import options, consts
 from tpDcc.managers import resources
 from tpDcc.libs.python import path, folder, settings
 
-LOGGER = logging.getLogger('tpDcc-core')
+logger = logging.getLogger('tpDcc-core')
 
 
 class ProjectData(options.OptionObject):
@@ -82,7 +82,7 @@ class ProjectData(options.OptionObject):
 
         project_file = self.get_project_file()
         if not self._settings.has_settings():
-            LOGGER.warning('No valid project data found on Project Data File: {}'.format(project_file))
+            logger.warning('No valid project data found on Project Data File: {}'.format(project_file))
 
         encoded_image = self._settings.get('image')
         if not encoded_image:
@@ -98,7 +98,7 @@ class ProjectData(options.OptionObject):
 
         project_file = self.get_project_file()
         if not self._settings.has_settings():
-            LOGGER.warning('No valid project data found on Project Data File: {}'.format(project_file))
+            logger.warning('No valid project data found on Project Data File: {}'.format(project_file))
 
         self._name = self._settings.get('name')
         self._project_path = path.get_dirname(path.get_dirname(project_file))
@@ -112,7 +112,7 @@ class ProjectData(options.OptionObject):
         from tpDcc.libs.qt.core import image
 
         if not os.path.isfile(image_path):
-            LOGGER.warning('Given image path "{}" is not valid!'.format(image_path))
+            logger.warning('Given image path "{}" is not valid!'.format(image_path))
             return False
 
         if not self._settings:
@@ -120,7 +120,7 @@ class ProjectData(options.OptionObject):
 
         project_file = self.get_project_file()
         if not self._settings.has_settings():
-            LOGGER.warning('No valid project data found on Project Data File: {}'.format(project_file))
+            logger.warning('No valid project data found on Project Data File: {}'.format(project_file))
 
         self._settings.set('image', image.image_to_base64(image_path))
 
@@ -129,7 +129,7 @@ class ProjectData(options.OptionObject):
     def create_project(self):
         project_full_path = self.full_path
         if path.is_dir(project_full_path):
-            LOGGER.warning('Project Path {} already exists! Choose another one ...'.format(project_full_path))
+            logger.warning('Project Path {} already exists! Choose another one ...'.format(project_full_path))
             return
 
         folder.create_folder(name=self.name, directory=self._project_path)

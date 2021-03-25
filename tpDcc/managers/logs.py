@@ -7,9 +7,9 @@ Module that contains implementation to handle DCC logs themes
 
 import logging
 
-LOGGER = logging.getLogger('tpDcc-core')
-
 from tpDcc.managers import tools, libs
+
+logger = logging.getLogger('tpDcc-core')
 
 
 def get_logger(plugin_id=None):
@@ -28,7 +28,7 @@ def get_logger(plugin_id=None):
     elif '-libs-' in plugin_id:
         plugin_data = libs.LibsManager().get_library_data_from_id(plugin_id)
     if not plugin_data:
-        LOGGER.warning('No logger found for: {}. Using tpDcc-core logger as fallback.'.format(plugin_id))
+        logger.warning('No logger found for: {}. Using tpDcc-core logger as fallback.'.format(plugin_id))
         return logging.getLogger('tpDcc-core')
 
     logging_file = plugin_data.get('logging_file', None)

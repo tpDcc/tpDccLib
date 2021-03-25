@@ -20,7 +20,7 @@ else:
     import importlib.util
     import importlib as loader
 
-LOGGER = logging.getLogger('tpDcc-core')
+logger = logging.getLogger('tpDcc-core')
 
 
 @decorators.add_metaclass(decorators.Singleton)
@@ -72,7 +72,7 @@ class LibsManager(plugin.PluginFactory):
             found_libs.append(lib_path)
 
         if not found_libs:
-            LOGGER.warning('No libraries found in package "{}"'.format(package_name))
+            logger.warning('No libraries found in package "{}"'.format(package_name))
 
         found_libs = list(set(found_libs))
         self.register_paths(found_libs, package_name=package_name)

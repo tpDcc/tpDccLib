@@ -13,7 +13,7 @@ import traceback
 
 # To avoid errors when initializing Dcc server
 try:
-    from tpDcc.vendors import metayaml
+    import metayaml
 except ImportError:
     pass
 

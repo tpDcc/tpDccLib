@@ -8,7 +8,7 @@ Module that contains DCC scene abstract class implementation
 from __future__ import print_function, division, absolute_import
 
 from tpDcc import dcc
-from tpDcc.libs.python import decorators, python
+from tpDcc.core import utils
 
 
 class AbstractScene(object):
@@ -45,7 +45,6 @@ class AbstractScene(object):
     # ABSTRACT FUNCTIONS
     # ==============================================================================================
 
-    @decorators.abstractmethod
     def _dcc_objects(self, from_selection=False, wildcard='', object_type=None):
         """
         Internal function that returns DCC objects from current scene
@@ -57,7 +56,6 @@ class AbstractScene(object):
 
         raise NotImplementedError('Abstract Scene _dcc_objects function not implemented!')
 
-    @decorators.abstractmethod
     def _rename_dcc_objects(self, dcc_native_objects, names, display=True):
         """
         Rename given DCC objects with the given new names
@@ -114,7 +112,7 @@ class AbstractScene(object):
         :return: bool, True if the operation was successful; False otherwise
         """
 
-        objects = python.force_list(objects)
+        objects = utils.force_list(objects)
         return self._remove_dcc_objects([obj.dcc_native_object() for obj in objects if not obj.is_deleted()])
 
     def rename_objects(self, objects, names, display=True):
@@ -126,8 +124,8 @@ class AbstractScene(object):
         :return: bool, True if the operation is successful; False otherwise
         """
 
-        objects = python.force_list(objects)
-        names = python.force_list(names)
+        objects = utils.force_list(objects)
+        names = utils.force_list(names)
 
         if len(objects) != len(names):
             return False

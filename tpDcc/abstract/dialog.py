@@ -7,31 +7,24 @@ Module that contains DCC dialog abstract implementation
 
 from __future__ import print_function, division, absolute_import
 
-from tpDcc.libs.python import decorators
-
 
 class AbstractDialog(object):
 
     def __init__(self, *args, **kwargs):
         super(AbstractDialog, self).__init__(*args, **kwargs)
 
-    @decorators.abstractmethod
     def default_settings(self):
         pass
 
-    @decorators.abstractmethod
     def load_theme(self):
         pass
 
-    @decorators.abstractmethod
     def set_widget_height(self):
         pass
 
-    @decorators.abstractmethod
     def is_frameless(self):
         pass
 
-    @decorators.abstractmethod
     def set_frameless(self, flag):
         pass
 
@@ -42,7 +35,6 @@ class AbstractColorDialog(object):
 
 class AbstractFileFolderDialog(object):
 
-    @decorators.abstractmethod
     def open_app_browser(self):
         pass
 
@@ -50,7 +42,6 @@ class AbstractFileFolderDialog(object):
 class AbstractNativeDialog(object):
 
     @staticmethod
-    @decorators.abstractmethod
     def open_file(title='Open File', start_directory=None, filters=None):
         """
         Function that shows open file DCC native dialog
@@ -63,7 +54,6 @@ class AbstractNativeDialog(object):
         raise NotImplementedError('open_file() function is not implemented')
 
     @staticmethod
-    @decorators.abstractmethod
     def save_file(title='Save File', start_directory=None, filters=None):
         """
         Function that shows save file DCC native dialog
@@ -76,7 +66,6 @@ class AbstractNativeDialog(object):
         raise NotImplementedError('save_file() function is not implemented')
 
     @staticmethod
-    @decorators.abstractmethod
     def select_folder(title='Select Folder', start_directory=None):
         """
         Function that shows select folder DCC native dialog

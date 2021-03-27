@@ -16,13 +16,15 @@ from collections import deque
 from abc import ABCMeta, abstractproperty, abstractmethod
 
 from tpDcc import dcc
-from tpDcc.core import exceptions
-from tpDcc.libs.python import decorators, osplatform, plugin
+from tpDcc.libs.python import decorators
+from tpDcc.libs.plugin.core import factory
+
+from tpDcc.core import exceptions, utils
 
 logger = logging.getLogger('tpDcc-core')
 
 
-@decorators.add_metaclass(ABCMeta)
+@utils.add_metaclass(ABCMeta)
 class DccCommand(object):
 
     class ArgumentParser(dict):
@@ -201,7 +203,7 @@ class CommandStats(object):
             'id': self._command.id,
             'application': dcc.get_name()
         })
-        self._info.update(osplatform.machine_info())
+        self._info.update(utils.machine_info())
 
     def start(self):
         """
@@ -243,7 +245,7 @@ class BaseCommandRunner(object):
     def __init__(self):
         self._undo_stack = deque()
         self._redo_stack = deque()
-        self._manager = plugin.PluginFactory(DccCommand, plugin_id='id')
+        self._manager = factory.PluginFactory(DccCommand, plugin_id='id')
         self._manager.register_paths_from_env_var('TPDCC_COMMAND_LIB', package_name='tpDcc')
 
     @property
@@ -255,7 +257,7 @@ class BaseCommandRunner(object):
         return self._redo_stack
 
     def commands(self):
-        return self._manager.get_plugins()
+        return self._manager.plugins()
 
     def manager(self):
         return self._manager

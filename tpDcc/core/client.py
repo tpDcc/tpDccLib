@@ -28,9 +28,8 @@ import tpDcc.config
 import tpDcc.libs.python
 import tpDcc.libs.resources
 import tpDcc.libs.qt.loader
-from tpDcc.core import server, dcc as core_dcc
+from tpDcc.core import utils, server, dcc as core_dcc
 from tpDcc.managers import configs
-from tpDcc.libs.python import python, osplatform, process, path as path_utils
 
 if sys.version_info[0] == 2:
     from socket import error as ConnectionRefusedError
@@ -487,10 +486,10 @@ class DccClient(BaseClient):
                 if supported_dccs and dcc_name not in supported_dccs:
                     continue
 
-                process_name = core_dcc.Dccs.executables.get(dcc_name, dict()).get(osplatform.get_platform(), None)
+                process_name = core_dcc.Dccs.executables.get(dcc_name, dict()).get(utils.get_platform(), None)
                 if not process_name:
                     continue
-                process_running = process.check_if_process_is_running(process_name)
+                process_running = utils.check_if_process_is_running(process_name)
                 if not process_running:
                     continue
                 self._running_dccs.append(dcc_name)
@@ -514,7 +513,7 @@ class DccClient(BaseClient):
             try:
                 res = getattr(dcc, cmd)(**cmd_dict)
             except TypeError:
-                if python.is_python2():
+                if utils.is_python2():
                     function_kwargs = inspect.getargspec(getattr(dcc, cmd))
                     plugin_kwargs = function_kwargs.args
                     if not function_kwargs:
@@ -604,7 +603,7 @@ class DccClient(BaseClient):
         cmd = {
             'cmd': 'update_dcc_paths',
             'paths': OrderedDict({
-                'tpDcc.dccs.{}'.format(dcc_name): path_utils.clean_path(
+                'tpDcc.dccs.{}'.format(dcc_name): utils.clean_path(
                     os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(mod.get_filename())))))
             })
         }
@@ -741,16 +740,16 @@ class DccClient(BaseClient):
         """
 
         return {
-            'tpDcc.loader': path_utils.clean_path(os.path.dirname(os.path.dirname(tpDcc.loader.__file__))),
-            'tpDcc.config': path_utils.clean_path(
+            'tpDcc.loader': utils.clean_path(os.path.dirname(os.path.dirname(tpDcc.loader.__file__))),
+            'tpDcc.config': utils.clean_path(
                 os.path.dirname(os.path.dirname(os.path.dirname(tpDcc.config.__file__)))),
-            'tpDcc.libs.python': path_utils.clean_path(
+            'tpDcc.libs.python': utils.clean_path(
                 os.path.dirname(
                     os.path.dirname(os.path.dirname(os.path.dirname(tpDcc.libs.python.__file__))))),
-            'tpDcc.libs.resources': path_utils.clean_path(
+            'tpDcc.libs.resources': utils.clean_path(
                 os.path.dirname(
                     os.path.dirname(os.path.dirname(os.path.dirname(tpDcc.libs.resources.__file__))))),
-            'tpDcc.libs.qt.loader': path_utils.clean_path(
+            'tpDcc.libs.qt.loader': utils.clean_path(
                 os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(tpDcc.libs.qt.loader.__file__)))))
         }
 

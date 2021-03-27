@@ -9,8 +9,7 @@ from __future__ import print_function, division, absolute_import
 
 from tpDcc import dcc
 from tpDcc.abstract import scenewrapper
-from tpDcc.core import consts
-from tpDcc.libs.python import python
+from tpDcc.core import consts, utils
 
 
 class AbstractSceneObject(scenewrapper.AbstractSceneWrapper, object):

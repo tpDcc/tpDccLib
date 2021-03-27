@@ -12,7 +12,8 @@ import re
 import logging
 
 from tpDcc.core import library
-from tpDcc.libs.python import python, decorators, plugin, path as path_utils
+from tpDcc.libs.python import python, decorators, path as path_utils
+from tpDcc.libs.plugin.core import factory
 
 if python.is_python2():
     import pkgutil as loader
@@ -24,7 +25,7 @@ logger = logging.getLogger('tpDcc-core')
 
 
 @decorators.add_metaclass(decorators.Singleton)
-class LibsManager(plugin.PluginFactory):
+class LibsManager(factory.PluginFactory):
 
     REGEX_FOLDER_VALIDATOR = re.compile('^((?!__pycache__)(?!dccs).)*$')
 

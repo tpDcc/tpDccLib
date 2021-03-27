@@ -22,6 +22,7 @@ Submodules
    tpDcc.core.scene
    tpDcc.core.server
    tpDcc.core.tool
+   tpDcc.core.utils
 
 Module contents
 ---------------

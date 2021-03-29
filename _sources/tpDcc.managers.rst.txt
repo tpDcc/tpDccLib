@@ -8,7 +8,6 @@ Submodules
    :maxdepth: 4
 
    tpDcc.managers.callbacks
-   tpDcc.managers.configs
    tpDcc.managers.libs
    tpDcc.managers.logs
    tpDcc.managers.menus

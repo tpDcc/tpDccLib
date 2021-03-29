@@ -10,13 +10,12 @@ from __future__ import print_function, division, absolute_import
 import os
 import logging.config
 
-import tpDcc.config
+from tpDcc.libs.python import contexts, path
+
 from tpDcc.core import dcc as core_dcc
-from tpDcc.libs.python import contexts
-from tpDcc.managers import configs, libs, tools, callbacks
-from tpDcc.libs.qt import loader as qt_loader
-from tpDcc.libs.qt.managers import toolsets
-from tpDcc import toolsets as dcc_toolsets
+from tpDcc.managers import libs, callbacks
+# from tpDcc.libs.qt.managers import toolsets
+# from tpDcc import toolsets as dcc_toolsets
 
 # =================================================================================
 
@@ -25,13 +24,12 @@ PACKAGE = 'tpDcc'
 # =================================================================================
 
 
-def init(dev=False):
+def init():
     """
     Initializes module
     :param dev: bool, Whether tpDcc-core is initialized in dev mode or not
     """
-    os.environ['TPDCC_DEV'] = str(dev) if dev else ''
-    logger = create_logger(dev=dev)
+    logger = create_logger()
 
     # Get DCC loader module
     dcc_loader_module = core_dcc.get_dcc_loader_module()
@@ -39,36 +37,44 @@ def init(dev=False):
     if dcc_loader_module and hasattr(dcc_loader_module, 'init_dcc') and callable(dcc_loader_module.init_dcc):
         dcc_loader_module.init_dcc()
 
-    # After that, we initialize Qt library (we must do it after tpDcc one because tpDcc-libs-qt depends on tpDcc-core)
-    qt_loader.init(dev=dev)
+    # configs.register_package_configs(PACKAGE, os.path.dirname(tpDcc.config.__file__))
+    # core_config = configs.get_config('tpDcc-core', environment='development' if dev else 'production')
+    # if not core_config:
+    #     logger.warning(
+    #         'tpDcc-core configuration file not found! Make sure that you have tpDcc-config package installed!')
+    #     return None
+    #
+    # libs_to_load = core_config.get('libs', list())
+    # tools_to_load = core_config.get('tools', list())
 
-    configs.register_package_configs(PACKAGE, os.path.dirname(tpDcc.config.__file__))
-    core_config = configs.get_config('tpDcc-core', environment='development' if dev else 'production')
-    if not core_config:
-        logger.warning(
-            'tpDcc-core configuration file not found! Make sure that you have tpDcc-config package installed!')
-        return None
-
-    libs_to_load = core_config.get('libs', list())
-    tools_to_load = core_config.get('tools', list())
+    libs_paths = [path.clean_path(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'libs'))]
+    custom_paths_env = os.environ.get('TPDCC_LIBS', '')
+    custom_paths = custom_paths_env.split(';')
+    for custom_path in custom_paths:
+        if not custom_path or not os.path.isdir(custom_path):
+            continue
+        custom_path = path.clean_path(custom_path)
+        if custom_path in libs_paths:
+            continue
+        libs_paths.append(custom_path)
 
     with contexts.Timer('Libraries loaded', logger=logger):
-        libs.LibsManager().register_package_libs(PACKAGE, libs_to_register=libs_to_load)
+        libs.LibsManager().register_package_libs(PACKAGE, libs_paths=libs_paths)
     #     libs.LibsManager().load_registered_libs(PACKAGE)
 
-    with contexts.Timer('Tools loaded', logger=logger):
-        tools.ToolsManager().register_package_tools(PACKAGE, tools_to_register=tools_to_load)
-        # tools.ToolsManager().load_registered_tools(PACKAGE)
-
-    # with contexts.Timer('Toolsets loaded', logger=logger):
-    #     toolsets.ToolsetsManager().register_path(PACKAGE, os.path.dirname(dcc_toolsets.__file__))
-    #     toolsets.ToolsetsManager().load_registered_toolsets(PACKAGE, tools_to_load=tools_to_load)
+    # with contexts.Timer('Tools loaded', logger=logger):
+    #     tools.ToolsManager().register_package_tools(PACKAGE, tools_to_register=tools_to_load)
+    #     # tools.ToolsManager().load_registered_tools(PACKAGE)
+    #
+    # # with contexts.Timer('Toolsets loaded', logger=logger):
+    # #     toolsets.ToolsetsManager().register_path(PACKAGE, os.path.dirname(dcc_toolsets.__file__))
+    # #     toolsets.ToolsetsManager().load_registered_toolsets(PACKAGE, tools_to_load=tools_to_load)
 
     # Callbacks
     callbacks.CallbacksManager.initialize()
 
 
-def create_logger(dev=False):
+def create_logger():
     """
     Returns logger of current module
     """
@@ -81,7 +87,7 @@ def create_logger(dev=False):
 
     logging.config.fileConfig(logging_config, disable_existing_loggers=False)
     logger = logging.getLogger('tpDcc-core')
-    dev = os.getenv('TPDCC_DEV', dev)
+    dev = os.getenv('TPDCC_DEV', False)
     if dev:
         logger.setLevel(logging.DEBUG)
         for handler in logger.handlers:

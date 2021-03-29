@@ -10,7 +10,7 @@ from __future__ import print_function, division, absolute_import
 import logging
 from traceback import format_exc
 
-from tpDcc.core import utils
+from tpDcc.libs.python import decorators
 
 logger = logging.getLogger('tpDcc-core')
 
@@ -616,7 +616,7 @@ class PythonTickCallback(ICallback, object):
         return None
 
     @classmethod
-    @utils.repeater(interval)
+    @decorators.repeater(interval)
     def _tick(cls, token):
         """
         Internal function to handl the tick event

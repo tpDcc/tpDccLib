@@ -17,7 +17,7 @@ from functools import partial
 
 from tpDcc import dcc
 from tpDcc.dcc import window
-from tpDcc.managers import resources, configs
+from tpDcc.managers import resources
 from tpDcc.libs.python import decorators, version, modules
 
 logger = logging.getLogger('tpDcc-core')

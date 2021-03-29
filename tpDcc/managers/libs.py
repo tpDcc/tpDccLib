@@ -44,39 +44,15 @@ class LibsManager(factory.PluginFactory):
 
         return settings_file
 
-    def register_package_libs(self, package_name, libs_to_register=None):
+    def register_package_libs(self, package_name, libs_paths):
         """
         Registers  all libraries available in given package
         """
 
-        found_libs = list()
-
-        if not libs_to_register:
+        if not libs_paths:
             return
-        libs_to_register = python.force_list(libs_to_register)
-
-        libs_path = '{}.libs.{}'
-        for lib_name in libs_to_register:
-            pkg_path = libs_path.format(package_name, lib_name)
-            if python.is_python2():
-                pkg_loader = loader.find_loader(pkg_path)
-            else:
-                pkg_loader = importlib.util.find_spec(pkg_path)
-            if not pkg_loader:
-                continue
-
-            lib_path = path_utils.clean_path(
-                pkg_loader.filename if python.is_python2() else os.path.dirname(pkg_loader.origin))
-            if not lib_path or not os.path.isdir(lib_path):
-                continue
-
-            found_libs.append(lib_path)
-
-        if not found_libs:
-            logger.warning('No libraries found in package "{}"'.format(package_name))
-
-        found_libs = list(set(found_libs))
-        self.register_paths(found_libs, package_name=package_name)
+        libs_to_register = python.remove_dupes(python.force_list(libs_paths))
+        self.register_paths(libs_to_register, package_name=package_name)
 
         # Once plugins are registered we load them
         plugins = self.plugins(package_name=package_name)

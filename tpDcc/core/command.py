@@ -16,15 +16,15 @@ from collections import deque
 from abc import ABCMeta, abstractproperty, abstractmethod
 
 from tpDcc import dcc
-from tpDcc.libs.python import decorators
+from tpDcc.libs.python import decorators, osplatform
 from tpDcc.libs.plugin.core import factory
 
-from tpDcc.core import exceptions, utils
+from tpDcc.core import exceptions
 
 logger = logging.getLogger('tpDcc-core')
 
 
-@utils.add_metaclass(ABCMeta)
+@decorators.add_metaclass(ABCMeta)
 class DccCommand(object):
 
     class ArgumentParser(dict):
@@ -203,7 +203,7 @@ class CommandStats(object):
             'id': self._command.id,
             'application': dcc.get_name()
         })
-        self._info.update(utils.machine_info())
+        self._info.update(osplatform.machine_info())
 
     def start(self):
         """

@@ -1,8 +1,5 @@
 # ===================================================================
 # tpDcc-core requirements file
 # ===================================================================
-Qt.py
-metayaml
-tpDcc-config
 tpDcc-libs-python
 tpDcc-libs-plugin

@@ -7,9 +7,11 @@ Module that contains DCC scene object abstract class implementation
 
 from __future__ import print_function, division, absolute_import
 
+from tpDcc.libs.python import python
+
 from tpDcc import dcc
 from tpDcc.abstract import scenewrapper
-from tpDcc.core import consts, utils
+from tpDcc.core import consts
 
 
 class AbstractSceneObject(scenewrapper.AbstractSceneWrapper, object):

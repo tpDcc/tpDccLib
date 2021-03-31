@@ -13,6 +13,7 @@ import logging
 
 from tpDcc import dcc
 from tpDcc.core import tool
+from tpDcc.managers import resources, configs
 from tpDcc.libs.python import python, decorators, path as path_utils
 from tpDcc.libs.qt.core import contexts
 from tpDcc.libs.plugin.core import factory
@@ -266,53 +267,51 @@ class ToolsManager(factory.PluginFactory):
     #             hub_ui_found = ui
     #
     #     return hub_ui_found
-    #
-    # # ============================================================================================================
-    # # CONFIGS
-    # # ============================================================================================================
-    #
-    # def get_tool_config(self, tool_id, package_name=None):
-    #     """
-    #     Returns config applied to given tool
-    #     :param tool_id: str
-    #     :param package_name: str
-    #     :return: Theme
-    #     """
-    #
-    #     if not package_name:
-    #         package_name = tool_id.replace('.', '-').split('-')[0]
-    #
-    #     if package_name not in self._plugins:
-    #         LOGGER.warning(
-    #             'Impossible to retrieve tool config for "{}" in package "{}"! Package not registered.'.format(
-    #                 tool_id, package_name))
-    #         return None
-    #
-    #     if tool_id not in self._plugins[package_name]:
-    #         LOGGER.warning(
-    #             'Impossible to retrieve tool config for "{}" in package "{}"! Tool not found'.format(
-    #                 tool_id, package_name))
-    #         return None
-    #
-    #     config = self._plugins[package_name][tool_id].get('config', None)
-    #
-    #     return config
-    #
-    # # ============================================================================================================
-    # # THEMES
-    # # ============================================================================================================
-    #
-    # def get_tool_theme(self, tool_id, package_name=None):
-    #     """
-    #     Returns theme applied to given tool
-    #     :param tool_id: str
-    #     :param package_name: str
-    #     :return: Theme
-    #     """
-    #
-    #     found_tool = self.get_tool_by_id(tool_id, package_name=package_name)
-    #     if not found_tool:
-    #         return None
-    #
-    #     theme_name = found_tool.settings.get('theme', 'default')
-    #     return resources.theme(theme_name)
+
+    # ============================================================================================================
+    # CONFIGS
+    # ============================================================================================================
+
+    def get_tool_config(self, tool_id, package_name=None):
+        """
+        Returns config applied to given tool
+        :param tool_id: str
+        :param package_name: str
+        :return: Theme
+        """
+
+        if not package_name:
+            package_name = tool_id.replace('.', '-').split('-')[0]
+
+        if package_name not in self._plugins:
+            LOGGER.warning(
+                'Impossible to retrieve tool config for "{}" in package "{}"! Package not registered.'.format(
+                    tool_id, package_name))
+            return None
+
+        if tool_id not in self._plugins[package_name]:
+            LOGGER.warning(
+                'Impossible to retrieve tool config for "{}" in package "{}"! Tool not found'.format(
+                    tool_id, package_name))
+            return None
+
+        return configs.get_tool_config(tool_id=tool_id, package_name=package_name)
+
+    # ============================================================================================================
+    # THEMES
+    # ============================================================================================================
+
+    def get_tool_theme(self, tool_id, package_name=None):
+        """
+        Returns theme applied to given tool
+        :param tool_id: str
+        :param package_name: str
+        :return: Theme
+        """
+
+        tool_settings = self.get_tool_settings_file(tool_id, package_name=package_name)
+        if not tool_settings:
+            return None
+
+        theme_name = tool_settings.get('theme', 'default')
+        return resources.theme(theme_name)

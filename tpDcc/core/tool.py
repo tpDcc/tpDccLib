@@ -17,7 +17,7 @@ from functools import partial
 
 from tpDcc import dcc
 from tpDcc.dcc import window
-from tpDcc.managers import resources
+from tpDcc.managers import resources, configs
 from tpDcc.libs.python import decorators, version, modules
 
 logger = logging.getLogger('tpDcc-core')
@@ -249,9 +249,6 @@ class DccTool(object):
             return None
 
         toolset_class = self.TOOLSET_CLASS
-        if not toolset_class:
-            logger.warning('Impossible to run tool! Tool "{}" does not define a toolset class.'.format(self.ID))
-            return None
         # toolset_data_copy = copy.deepcopy(self._config.data)
         # toolset_data_copy.update(toolset_class.CONFIG.data)
         # toolset_class.CONFIG.data = toolset_data_copy
@@ -265,10 +262,12 @@ class DccTool(object):
         if not attacher_class:
             attacher_class = window.Window
 
-        toolset_inst = toolset_class(**tool_kwargs)
-        toolset_inst.ID = tool_id
-        toolset_inst.CONFIG = tool_config_dict
-        toolset_inst.initialize(client=self._client)
+        toolset_inst = None
+        if toolset_class:
+            toolset_inst = toolset_class(**tool_kwargs)
+            toolset_inst.ID = tool_id
+            toolset_inst.CONFIG = tool_config_dict
+            toolset_inst.initialize(client=self._client)
 
         # noinspection PyArgumentList
         self._attacher = attacher_class(
@@ -276,7 +275,8 @@ class DccTool(object):
             show_on_initialize=False, frameless=self.is_frameless, dockable=True, toolset=toolset_inst,
             icon=resources.icon(tool_config_dict.get('icon', 'tpdcc')))
 
-        toolset_inst.set_attacher(self._attacher)
+        if toolset_inst:
+            toolset_inst.set_attacher(self._attacher)
         # self._attacher.setWindowIcon(toolset_inst.get_icon())
         self._attacher.setWindowTitle('{} - {}'.format(self._attacher.windowTitle(), self.VERSION))
         if tool_size:

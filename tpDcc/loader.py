@@ -12,8 +12,9 @@ import logging.config
 
 from tpDcc.libs.python import contexts, path
 
+import tpDcc.config
 from tpDcc.core import dcc as core_dcc
-from tpDcc.managers import libs, callbacks
+from tpDcc.managers import configs, libs, callbacks
 # from tpDcc.libs.qt.managers import toolsets
 # from tpDcc import toolsets as dcc_toolsets
 
@@ -37,29 +38,19 @@ def init():
     if dcc_loader_module and hasattr(dcc_loader_module, 'init_dcc') and callable(dcc_loader_module.init_dcc):
         dcc_loader_module.init_dcc()
 
-    # configs.register_package_configs(PACKAGE, os.path.dirname(tpDcc.config.__file__))
-    # core_config = configs.get_config('tpDcc-core', environment='development' if dev else 'production')
-    # if not core_config:
-    #     logger.warning(
-    #         'tpDcc-core configuration file not found! Make sure that you have tpDcc-config package installed!')
-    #     return None
-    #
-    # libs_to_load = core_config.get('libs', list())
-    # tools_to_load = core_config.get('tools', list())
+    environment = 'development' if os.environ.get('TPDCC_DEV', False) else 'production'
+    configs.register_package_configs(PACKAGE, os.path.dirname(tpDcc.config.__file__))
+    core_config = configs.get_config('tpDcc-core', environment=environment)
+    if not core_config:
+        logger.warning(
+            'tpDcc-core configuration file not found! Make sure that you have tpDcc-config package installed!')
+        return None
 
-    libs_paths = [path.clean_path(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'libs'))]
-    custom_paths_env = os.environ.get('TPDCC_LIBS', '')
-    custom_paths = custom_paths_env.split(';')
-    for custom_path in custom_paths:
-        if not custom_path or not os.path.isdir(custom_path):
-            continue
-        custom_path = path.clean_path(custom_path)
-        if custom_path in libs_paths:
-            continue
-        libs_paths.append(custom_path)
+    libs_to_load = core_config.get('libs', list())
+    tools_to_load = core_config.get('tools', list())
 
     with contexts.Timer('Libraries loaded', logger=logger):
-        libs.LibsManager().register_package_libs(PACKAGE, libs_paths=libs_paths)
+        libs.LibsManager().register_package_libs(PACKAGE, libs_to_register=libs_to_load)
     #     libs.LibsManager().load_registered_libs(PACKAGE)
 
     # with contexts.Timer('Tools loaded', logger=logger):

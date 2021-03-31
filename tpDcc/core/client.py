@@ -26,8 +26,8 @@ from tpDcc import dcc
 import tpDcc.loader
 import tpDcc.libs.python
 import tpDcc.libs.resources
-import tpDcc.libs.qt.loader
 from tpDcc.core import server, dcc as core_dcc
+from tpDcc.managers import configs
 from tpDcc.libs.python import python, osplatform, process, path as path_utils
 
 if sys.version_info[0] == 2:

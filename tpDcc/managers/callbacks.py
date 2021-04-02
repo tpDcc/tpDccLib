@@ -65,7 +65,7 @@ class CallbacksManager(object):
             callback_class = getattr(dcc_callback.Callback(), '{}Callback'.format(callback_name), None)
             if not callback_class:
                 callback_class = default_callbacks.get(callback_name, callback.ICallback)
-                logger.warning(
+                logger.debug(
                     'Dcc {} does not provides an ICallback for {}Callback. Using {} instead'.format(
                         dcc.get_name(), callback_name, callback_class.__name__))
 

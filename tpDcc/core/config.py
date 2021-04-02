@@ -50,11 +50,11 @@ class YAMLConfigurationParser(object):
 
 
 class DccConfig(object):
-    def __init__(self, config_name, environment, data):
+    def __init__(self, config_name, data, environment=None):
         super(DccConfig, self).__init__()
 
         self._config_name = config_name
-        self._environment = environment
+        self._environment = environment or 'production'
         self._parsed_data = data
 
     @property
@@ -105,7 +105,7 @@ class DccConfig(object):
             if not attr_section:
                 attr_to_use = attr_name
             attr_value = self._parsed_data.get(attr_to_use, None)
-            if attr_value is None:
+            if attr_value is None and default is None:
                 logger.warning('Configuration "{}" has no attribute "{}" for "{}"'.format(
                     self._config_name, attr_to_use, self._environment))
                 return default

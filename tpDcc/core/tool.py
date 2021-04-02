@@ -15,6 +15,8 @@ import logging
 import traceback
 from functools import partial
 
+from Qt.QtWidgets import QWidget
+
 from tpDcc import dcc
 from tpDcc.dcc import window
 from tpDcc.managers import resources, configs
@@ -48,7 +50,6 @@ class DccTool(object):
         self._client = None
         self._client_status = None
         self._is_frameless = True
-        # self._is_frameless = self.config_dict().get('is_checked', False)
         self._settings = settings
         self._stats = ToolStats(self)
         self._dev = dev
@@ -123,6 +124,57 @@ class DccTool(object):
                     logger.debug('Impossible to retrieve version for "{}" | {}'.format(cls.ID, exc))
 
         return cls.VERSION
+
+    @classmethod
+    def register_config(cls, package_name=None, config_id=None, config_name='config.yml', root_path=None):
+        """
+        Returns tool config
+        :return:
+        """
+
+        root_path = getattr(cls, 'PATH', root_path)
+        if root_path:
+            paths_to_search = [
+                os.path.dirname(root_path),
+                os.path.dirname(os.path.dirname(root_path))
+            ]
+        else:
+            paths_to_search = list()
+
+        config_id = config_id or cls.ID
+        base_config_path = None
+        dcc_config_path = None
+        for root_path in paths_to_search:
+            dcc_path = os.path.join(root_path, 'dccs', dcc.client().get_name())
+            config_dcc_path = os.path.join(dcc_path, config_name)
+            if os.path.isfile(config_dcc_path):
+                dcc_config_path = config_dcc_path
+                break
+            config_path = os.path.join(root_path, config_name)
+            if os.path.isfile(config_path):
+                base_config_path = config_path
+                break
+        if not base_config_path and not dcc_config_path:
+            return None
+
+        config_path = None
+        if os.path.isfile(dcc_config_path):
+            config_path = dcc_config_path
+        if not config_path and os.path.isfile(base_config_path):
+            config_path = base_config_path
+        if not config_path:
+            return None
+
+        configs.register_config(package_name=package_name or cls.PACKAGE, config_id=config_id, config_path=config_path)
+
+    @classmethod
+    def get_config(cls, config_id=None):
+        """
+        Returns tool config
+        :return:
+        """
+
+        return configs.get_config(config_id or cls.ID, cls.PACKAGE, extra_data=cls.config_dict())
 
     @staticmethod
     def creator():
@@ -222,7 +274,7 @@ class DccTool(object):
         launch_frameless = kwargs.get('launch_frameless', None)
         frameless_active = launch_frameless if launch_frameless is not None else self._is_frameless
 
-        tool = self.run_tool(frameless_active, kwargs)
+        tool = self.run_tool(**kwargs)
 
         ret = {'tool': tool, 'bootstrap': None}
         if hasattr(tool, 'closed'):
@@ -232,13 +284,14 @@ class DccTool(object):
 
         return ret
 
-    def run_tool(self, frameless_active=True, tool_kwargs=None, attacher_class=None):
+    def run_tool(self, attacher_class=None, **kwargs):
         """
         Function that launches current tool
-        :param frameless_active: bool, Whether the tool will be launch in frameless mode or not
         :param tool_kwargs: dict, dictionary of arguments to launch tool with
         :return:
         """
+
+        from tpDcc.managers import tools
 
         tool_config_dict = self.config_dict()
         tool_name = tool_config_dict.get('name', None)
@@ -248,23 +301,29 @@ class DccTool(object):
             logger.warning('Impossible to run tool "{}" with id: "{}"'.format(tool_name, tool_id))
             return None
 
+        # Close tool if is already instanced
+        main_window = dcc.client().get_main_window()
+        if main_window:
+            wins = dcc.get_main_window().findChildren(QWidget, tool_id) or list()
+            for w in wins:
+                w.close()
+                w.deleteLater()
+        # tool_instance = tools.ToolsManager().get_tool_by_plugin_instance()
+
         toolset_class = self.TOOLSET_CLASS
         # toolset_data_copy = copy.deepcopy(self._config.data)
         # toolset_data_copy.update(toolset_class.CONFIG.data)
         # toolset_class.CONFIG.data = toolset_data_copy
 
-        if tool_kwargs is None:
-            tool_kwargs = dict()
-
-        tool_kwargs['collapsable'] = False
-        tool_kwargs['show_item_icon'] = False
+        kwargs['collapsable'] = False
+        kwargs['show_item_icon'] = False
 
         if not attacher_class:
             attacher_class = window.Window
 
         toolset_inst = None
         if toolset_class:
-            toolset_inst = toolset_class(**tool_kwargs)
+            toolset_inst = toolset_class(**kwargs)
             toolset_inst.ID = tool_id
             toolset_inst.CONFIG = tool_config_dict
             toolset_inst.initialize(client=self._client)
@@ -338,7 +397,7 @@ class DccTool(object):
         Internal function that sets the configuration of the tool
         """
 
-        self._config = self._config or configs.get_tool_config(self.ID, self.PACKAGE)
+        self._config = self._config or self.get_config()
 
     def _launch(self, *args, **kwargs):
         """

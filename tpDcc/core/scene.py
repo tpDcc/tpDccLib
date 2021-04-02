@@ -33,7 +33,7 @@ class AbstractSceneWrapper(object):
 
         return self.unique_id()
 
-    def __call__(self, ret_type=consts.PointerTypes.Pointer):
+    def __call__(self, ret_type=None):
         """
         Returns native pointer wrapped by this object
         If you specify a ret_type, depending on the DCC, you will return a different pointer

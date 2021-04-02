@@ -354,7 +354,7 @@ class DccServer(BaseServer):
             reply['success'] = False
             return
 
-        paths = paths_data.values()
+        paths = list(paths_data.values())
 
         # TODO: Remove this ASAP
         # NOTE: For now, we add the dependencies manually

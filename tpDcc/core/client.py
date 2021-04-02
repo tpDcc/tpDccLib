@@ -382,7 +382,7 @@ class DccClient(BaseClient):
                 return None
         else:
             client._connect(**kwargs)
-        #     client.update_client(tool_id=tool_id, **kwargs)
+            client.update_client(tool_id=tool_id, **kwargs)
 
         return client
 
@@ -454,6 +454,11 @@ class DccClient(BaseClient):
         if self._server:
             self._status = {'msg': 'Client connected successfully!', 'level': self.Status.SUCCESS}
             self._connected = True
+            return True
+
+        connect_client = kwargs.pop('connect_client', True)
+        if not connect_client:
+            self._connected = False
             return True
 
         # # If we pass a port, we just connect to it
@@ -747,7 +752,7 @@ class DccClient(BaseClient):
                 os.path.dirname(
                     os.path.dirname(os.path.dirname(os.path.dirname(tpDcc.libs.resources.__file__))))),
             'tpDcc.libs.qt.loader': path_utils.clean_path(
-                os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(tpDcc.libs.qt.loader.__file__)))))
+                os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(tpDcc.libs.qt.__file__)))))
         }
 
     def _create_callbacks_server(self):

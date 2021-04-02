@@ -27,7 +27,7 @@ logger = logging.getLogger('tpDcc-core')
 @decorators.add_metaclass(decorators.Singleton)
 class LibsManager(factory.PluginFactory):
 
-    REGEX_FOLDER_VALIDATOR = re.compile('^((?!__pycache__)(?!dccs).)*$')
+    REGEX_FOLDER_VALIDATOR = re.compile('^((?!__pycache__)(?!dccs)(?!externals).)*$')
 
     def __init__(self):
         super(LibsManager, self).__init__(interface=library.DccLibrary, plugin_id='ID', version_id='VERSION')

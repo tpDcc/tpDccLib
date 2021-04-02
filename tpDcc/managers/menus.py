@@ -38,23 +38,23 @@ def get_menu(menu_name, package_name=None):
     return _MENUS.get(package_name, dict()).get(menu_name, None)
 
 
-def create_main_menu(package_name, force_creation=True):
+def create_main_menu(package_name, force_creation=True, icon=None):
     """
     Creates main menu for given package
     :param package_name: str
     :param force_creation: bool
+    :param icon: QIcon
     """
 
     if not package_name:
         return None
 
-    if package_name in _MENUS and _MENUS.get(package_name, None):
-        if not force_creation:
-            return _MENUS[package_name]
-        remove_previous_menus(package_name=package_name)
-
     object_menu_name = _OBJECT_MENU_NAMES[
         package_name] if package_name in _OBJECT_MENU_NAMES else '{}_Menu'.format(package_name)
+    if package_name in _MENUS and _MENUS.get(package_name, None) and object_menu_name in _MENUS[package_name]:
+        if not force_creation:
+            return _MENUS[package_name][object_menu_name]
+    remove_previous_menus(package_name=package_name)
     menu_name = _MENU_NAMES[package_name] if package_name in _MENU_NAMES else package_name
 
     main_win = dcc.get_main_window()
@@ -65,14 +65,20 @@ def create_main_menu(package_name, force_creation=True):
                 package_name))
         return None
     main_menu = menu.SearchableMenu(objectName=object_menu_name, title=menu_name, parent=parent_menu_bar)
+    if icon:
+        main_menu.setIcon(icon)
     parent_menu_bar.addMenu(main_menu)
     main_menu.setObjectName(object_menu_name)
     main_menu.setTearOffEnabled(True)
+    _MENU_NAMES.setdefault(package_name, list())
+    _MENUS.setdefault(package_name, dict())
+    _MENUS[package_name].setdefault(object_menu_name, main_menu)
+    _MENU_NAMES[package_name].append(object_menu_name)
 
     return main_menu
 
 
-def create_menus(package_name, dev=False):
+def create_menus(package_name, dev=False, icon=None, force_main_menu_creation=True):
     """
     Loops through all loaded plugins and creates a menu/action for each one.
     Function that should be implemented in specific DCC Menu Managers to create proper menu
@@ -136,7 +142,6 @@ def create_menus(package_name, dev=False):
 
             # NOTE: Here we don't pass the package for now. If we pass a package, for example, tpRigTooklit, tpDcc
             # packages will not be added to the menu
-            # TODO: Fix this
             tool_config = configs.get_tool_config(tool_id)
             if not tool_config:
                 return
@@ -189,11 +194,15 @@ def create_menus(package_name, dev=False):
             only_dev = data.get('only_dev', False)
             if only_dev and dev:
                 return
+            icon_name = data.get('icon', None)
             found_menu = parent_menu.addMenu(data['label'])
             found_menu.setObjectName(data['label'])
             found_menu.setTearOffEnabled(True)
-            if package_name not in _MENUS:
-                _MENUS[package_name] = dict()
+            if icon_name:
+                icon = resources.icon(icon_name)
+                if icon:
+                    found_menu.setIcon(icon)
+            _MENUS.setdefault(package_name, dict())
             _MENUS[package_name][data['label']] = found_menu
 
         if 'children' not in data:
@@ -216,9 +225,7 @@ def create_menus(package_name, dev=False):
                 continue
             _add_action(child, found_menu)
 
-    remove_previous_menus(package_name=package_name)
-
-    main_menu = create_main_menu(package_name=package_name)
+    main_menu = create_main_menu(package_name=package_name, icon=icon, force_creation=force_main_menu_creation)
     if not main_menu:
         logger.warning('Impossible to create main menu for "{}"'.format(package_name))
         return False

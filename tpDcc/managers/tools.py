@@ -24,19 +24,17 @@ else:
     import importlib.util
     import importlib as loader
 
-LOGGER = logging.getLogger('tpDcc-core')
+logger = logging.getLogger('tpDcc-core')
 
 
-@decorators.add_metaclass(decorators.Singleton)
-class ToolsManager(factory.PluginFactory):
+class BaseToolsManager(factory.PluginFactory):
 
     REGEX_FOLDER_VALIDATOR = re.compile('^((?!__pycache__)(?!dccs).)*$')
 
     def __init__(self):
-        super(ToolsManager, self).__init__(interface=tool.DccTool, plugin_id='ID', version_id='VERSION')
+        super(BaseToolsManager, self).__init__(interface=tool.DccTool, plugin_id='ID', version_id='VERSION')
 
         self._loaded_tools = dict()
-        self._hub_tools = list()
 
     def register_package_tools(self, package_name, tools_to_register=None):
         """
@@ -67,17 +65,19 @@ class ToolsManager(factory.PluginFactory):
             found_tools.append(tool_path)
 
         if not found_tools:
-            LOGGER.warning('No tools found in package "{}"'.format(package_name))
+            logger.warning('No tools found in package "{}"'.format(package_name))
 
         found_tools = list(set(found_tools))
         self.register_paths(found_tools, package_name=package_name)
 
-        for tool in self.plugins(package_name=package_name):
-            if not tool:
+        for tool_class in self.plugins(package_name=package_name):
+            if not tool_class:
                 continue
 
-            if not tool.PACKAGE:
-                tool.PACKAGE = package_name
+            if not tool_class.PACKAGE:
+                tool_class.PACKAGE = package_name
+            if tool_class.TOOLSET_CLASS:
+                tool_class.TOOLSET_CLASS.ID = tool_class.ID
 
     # ============================================================================================================
     # BASE
@@ -155,7 +155,7 @@ class ToolsManager(factory.PluginFactory):
 
         tool_class = self.get_plugin_from_id(tool_id, package_name=package_name)
         if not tool_class:
-            LOGGER.warning(
+            logger.warning(
                 'Impossible to launch tool. Tool with ID "{}" not found in package "{}"'.format(tool_id, package_name))
             return
 
@@ -165,18 +165,47 @@ class ToolsManager(factory.PluginFactory):
         self.close_tool(tool_id, package_name=package_name)
 
         with contexts.application():
+            tool_inst._launch(*args, **kwargs)
+            self._loaded_tools.setdefault(package_name, dict())
+            self._loaded_tools[package_name].setdefault(tool_id, None)
+            self._loaded_tools[package_name][tool_id] = tool_inst
 
-            if tool_id == 'tpDcc-tools-hub':
-                tool_data = tool_inst._launch(*args, **kwargs)
-                tool_ui = tool_data['tool']
-                self._hub_tools.append(tool_ui)
-            else:
-                tool_inst._launch(*args, **kwargs)
-                self._loaded_tools[tool_id] = tool_inst
-
-        LOGGER.debug('Execution time: {}'.format(tool_inst.stats.execution_time))
+        logger.debug('Execution time: {}'.format(tool_inst.stats.execution_time))
 
         return tool_inst
+
+    def get_tool_by_plugin_instance(self, tool_instance, package_name=None):
+        """
+        Returns tool instance by given plugin instance
+        :param plugin:
+        :param package_name:
+        :return:
+        """
+
+        package_name = package_name or tool_instance.PACKAGE
+        if not package_name:
+            logger.error('Impossible to retrieve data from plugin with undefined package!')
+            return None
+
+        if package_name not in self._plugins:
+            logger.error('Impossible to retrieve data from instance: package "{}" not registered!'.format(package_name))
+            return None
+
+        if hasattr(tool_instance, 'ID'):
+            tool_found = self.get_tool_instance_by_id(tool_instance.ID, package_name=package_name)
+            if not tool_found:
+                return None
+
+            return tool_found
+
+        return None
+
+    def get_tool_instance_by_id(self, tool_id, package_name=None):
+        if not package_name:
+            split_package = tool_id.replace('.', '-').split('-')[0]
+            package_name = split_package if split_package != tool_id else 'tpDcc'
+
+        return self._loaded_tools.get(package_name, dict()).get(tool_id, None)
 
     def close_tool(self, tool_id, package_name=None, force=True):
         """
@@ -187,7 +216,7 @@ class ToolsManager(factory.PluginFactory):
         """
 
         tool_class = self.get_plugin_from_id(tool_id, package_name=package_name)
-        if not tool_class or tool_id not in self._loaded_tools:
+        if not tool_class or package_name not in self._loaded_tools or tool_id not in self._loaded_tools[package_name]:
             return False
 
         closed_tool = False
@@ -200,7 +229,7 @@ class ToolsManager(factory.PluginFactory):
                     child.fade_close() if hasattr(child, 'fade_close') else child.close()
                     closed_tool = True
 
-        tool_to_close = self._loaded_tools[tool_id].attacher
+        tool_to_close = self._loaded_tools[package_name][tool_id].attacher
         try:
             if not closed_tool and tool_to_close:
                 tool_to_close.fade_close() if hasattr(tool_to_close, 'fade_close') else tool_to_close.close()
@@ -209,64 +238,25 @@ class ToolsManager(factory.PluginFactory):
                 tool_to_close.deleteLater()
         except RuntimeError:
             pass
-        self._loaded_tools.pop(tool_id)
+        self._loaded_tools[package_name].pop(tool_id)
+        if not self._loaded_tools[package_name]:
+            self._loaded_tools.pop(package_name)
 
         return True
 
-    def close_tools(self):
+    def close_tools(self, package_name=None):
         """
         Closes all available tools
         :return:
         """
 
-        for tool_id in self._loaded_tools.keys():
-            self.close_tool(tool_id, force=True)
-
-    # # ============================================================================================================
-    # # HUB
-    # # ============================================================================================================
-    #
-    # def close_hub_ui(self, hub_ui_inst):
-    #     if hub_ui_inst in self._hub_tools:
-    #         self._hub_tools.remove(hub_ui_inst)
-    #         LOGGER.debug('Close tpDcc Hub UI: {}'.format(hub_ui_inst))
-    #
-    # def get_hub_uis(self):
-    #     return self._hub_tools
-    #
-    # def get_last_focused_hub_ui(self, include_minimized=True):
-    #     """
-    #     Returns last focused Hub UI
-    #     :param include_minimized: bool, Whether or not take into consideration Hub UIs that are minimized
-    #     :return: HubUI
-    #     """
-    #
-    #     hub_ui_found = None
-    #     max_time = 0
-    #
-    #     all_hub_uis = self.get_hub_uis()
-    #     for ui in all_hub_uis:
-    #         if ui.isVisible() and ui.last_focused_time > max_time:
-    #             if (not include_minimized and not ui.isMinimized()) or include_minimized:
-    #                 hub_ui_found = ui
-    #                 max_time = ui.last_focused_time
-    #
-    #     return hub_ui_found
-    #
-    # def get_last_opened_hub_ui(self):
-    #     """
-    #     Returns last opened Hub UI
-    #     :return: HubUI
-    #     """
-    #
-    #     hub_ui_found = None
-    #
-    #     all_hub_uis = self.get_hub_uis()
-    #     for ui in all_hub_uis:
-    #         if ui.isVisible():
-    #             hub_ui_found = ui
-    #
-    #     return hub_ui_found
+        if package_name:
+            for tool_id in self._loaded_tools.get(package_name, dict()):
+                self.close_tool(tool_id, package_name-package_name, force=True)
+        else:
+            for package_name, tool_data in self._loaded_tools.items():
+                for tool_id in list(tool_data.keys()):
+                    self.close_tool(tool_id, package_name=package_name, force=True)
 
     # ============================================================================================================
     # CONFIGS
@@ -284,13 +274,14 @@ class ToolsManager(factory.PluginFactory):
             package_name = tool_id.replace('.', '-').split('-')[0]
 
         if package_name not in self._plugins:
-            LOGGER.warning(
+            logger.warning(
                 'Impossible to retrieve tool config for "{}" in package "{}"! Package not registered.'.format(
                     tool_id, package_name))
             return None
 
-        if tool_id not in self._plugins[package_name]:
-            LOGGER.warning(
+        tool_ids = [tool_class.ID for tool_class in self._plugins[package_name]]
+        if tool_id not in tool_ids:
+            logger.warning(
                 'Impossible to retrieve tool config for "{}" in package "{}"! Tool not found'.format(
                     tool_id, package_name))
             return None
@@ -315,3 +306,9 @@ class ToolsManager(factory.PluginFactory):
 
         theme_name = tool_settings.get('theme', 'default')
         return resources.theme(theme_name)
+
+
+@decorators.add_metaclass(decorators.Singleton)
+class ToolsManager(BaseToolsManager):
+    def __init__(self):
+        super(ToolsManager, self).__init__()

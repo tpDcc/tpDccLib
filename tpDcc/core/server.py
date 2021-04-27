@@ -125,7 +125,6 @@ class BaseServer(QObject):
         self._retrieved_data = json_data
 
     def _write(self, reply_dict):
-
         try:
             json_reply = json.dumps(reply_dict)
         except Exception:

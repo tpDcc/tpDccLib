@@ -302,7 +302,7 @@ class DccTool(object):
             return None
 
         # Close tool if is already instanced
-        main_window = dcc.client().get_main_window()
+        main_window = dcc.get_main_window()
         if main_window:
             wins = dcc.get_main_window().findChildren(QWidget, tool_id) or list()
             for w in wins:

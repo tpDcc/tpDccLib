@@ -10,11 +10,12 @@ from __future__ import print_function, division, absolute_import
 from tpDcc.libs.python import python
 
 from tpDcc import dcc
-from tpDcc.abstract import scenewrapper
+from tpDcc.abstract import scenewrapper as abstract_scenewrapper
 from tpDcc.core import consts
+from tpDcc.dcc import scenewrapper
 
 
-class AbstractSceneObject(scenewrapper.AbstractSceneWrapper, object):
+class AbstractSceneObject(abstract_scenewrapper.AbstractSceneWrapper, object):
 
     _object_type = consts.ObjectTypes.Generic
     _sub_classes = dict()
@@ -36,10 +37,9 @@ class AbstractSceneObject(scenewrapper.AbstractSceneWrapper, object):
 
         if scene_object_type in cls._sub_classes:
             sub_class = cls._sub_classes[scene_object_type]
+            return scenewrapper.SceneWrapper.__new__(sub_class)
 
-            return tp.SceneWrapper.__new__(sub_class)
-
-        return tp.SceneWrapper.__new__(cls)
+        return scenewrapper.SceneWrapper.__new__(cls)
 
     # ==============================================================================================
     # BASE

@@ -15,7 +15,6 @@ from tpDcc.libs.qt.widgets import window
 
 
 class _MetaWindow(type):
-
     def __call__(cls, *args, **kwargs):
         as_class = kwargs.pop('as_class', False)
         if dcc.is_maya():

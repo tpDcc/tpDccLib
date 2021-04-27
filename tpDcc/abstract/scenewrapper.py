@@ -8,6 +8,7 @@ Module that contains DCC scene wrapper abstract class implementation
 from __future__ import print_function, division, absolute_import
 
 from tpDcc.core import consts
+from tpDcc.libs.python import decorators
 
 
 class AbstractSceneWrapper(object):
@@ -46,10 +47,15 @@ class AbstractSceneWrapper(object):
 
         return self._dcc_native_object
 
+    def __str__(self):
+        return '<%s (%s)>' % (
+        super(AbstractSceneWrapper, self).__str__().split()[0].split('.')[-1], self.display_name())
+
     # ==============================================================================================
     # ABSTRACT FUNCTIONS
     # ==============================================================================================
 
+    @decorators.abstractmethod
     def name(self):
         """
         Returns the name of the DCC object in current DCC scene
@@ -58,6 +64,7 @@ class AbstractSceneWrapper(object):
 
         raise NotImplementedError('Abstract Scene Wrapper name function not implemented!')
 
+    @decorators.abstractmethod
     def display_name(self):
         """
         Returns the name of DCC object without special characters used by DCC.
@@ -66,6 +73,7 @@ class AbstractSceneWrapper(object):
 
         raise NotImplementedError('Abstract Scene Wrapper display_name function not implemented!')
 
+    @decorators.abstractmethod
     def set_display_name(self, new_name):
         """
         Sets the display name of the DCC object
@@ -74,6 +82,7 @@ class AbstractSceneWrapper(object):
 
         raise NotImplementedError('Abstract Scene Wrapper set_display_name function not implemented!')
 
+    @decorators.abstractmethod
     def path(self):
         """
         Returns the full path of the DCC object in current DCC scene
@@ -82,6 +91,7 @@ class AbstractSceneWrapper(object):
 
         raise NotImplementedError('Abstract Scene Wrapper path function not implemented!')
 
+    @decorators.abstractmethod
     def namespace(self):
         """
         Returns DCC object namespace
@@ -90,6 +100,7 @@ class AbstractSceneWrapper(object):
 
         raise NotImplementedError('Abstract Scene Wrapper namespace function not implemented!')
 
+    @decorators.abstractmethod
     def set_namespace(self, namespace):
         """
         Sets DCC object namespace
@@ -98,6 +109,7 @@ class AbstractSceneWrapper(object):
 
         raise NotImplementedError('Abstract Scene Wrapper set_namespace function not implemented!')
 
+    @decorators.abstractmethod
     def unique_id(self):
         """
         Returns the unique identifier of the wrapped native DCC object in current DCC scene
@@ -106,6 +118,17 @@ class AbstractSceneWrapper(object):
 
         raise NotImplementedError('Abstract Scene Wrapper unique_id function not implemented!')
 
+    @decorators.abstractmethod
+    def set_unique_id(self, value):
+        """
+        Set the unique id for this wrapper instance
+        :param value: object
+        :return:
+        """
+
+        raise NotImplementedError('Abstract Scene Wrapper set_unique_id function not implemented!')
+
+    @decorators.abstractmethod
     def has_attribute(self, attribute_name):
         """
         Returns whether or not wrapped native DCC object has an attribute with the given name
@@ -115,6 +138,7 @@ class AbstractSceneWrapper(object):
 
         raise NotImplementedError('Abstract Scene Wrapper has_attribute function not implemented!')
 
+    @decorators.abstractmethod
     def attribute_names(self, keyable=False, short_names=False, unlocked=True):
         """
         Returns a list of the attributes names linked to wrapped native DCC object
@@ -126,6 +150,7 @@ class AbstractSceneWrapper(object):
 
         raise NotImplementedError('Abstract Scene Wrapper attribute_names function not implemented!')
 
+    @decorators.abstractmethod
     def _dcc_native_copy(self):
         """
         Internal function that returns a copy/duplicate of the wrapped DCC object
@@ -134,6 +159,7 @@ class AbstractSceneWrapper(object):
 
         raise NotImplementedError('Abstract Scene Wrapper _dcc_native_copy function not implemented!')
 
+    @decorators.abstractmethod
     def _dcc_native_attribute(self, attribute_name, default=None):
         """
         Internal function that returns the value of the attribute of the wrapped DCC object
@@ -144,6 +170,7 @@ class AbstractSceneWrapper(object):
 
         raise NotImplementedError('Abstract Scene Wrapper _dcc_native_attribute function not implemented!')
 
+    @decorators.abstractmethod
     def _set_dcc_native_attribute(self, attribute_name, value):
         """
         Sets the value of the property defined by the given attribute name

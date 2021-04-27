@@ -21,6 +21,7 @@ class ICallback(object):
     """
 
     @classmethod
+    @decorators.abstractmethod
     def register(cls, fn, owner=None):
         """
         Register the given Python function
@@ -32,6 +33,7 @@ class ICallback(object):
         raise None
 
     @classmethod
+    @decorators.abstractmethod
     def unregister(cls, token):
         """
         Unregister the given Python function
@@ -41,6 +43,7 @@ class ICallback(object):
         return None
 
     @classmethod
+    @decorators.abstractmethod
     def filter(cls, *args):
         """
         Function used to process the arguments during an execution of a callback

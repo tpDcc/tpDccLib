@@ -15,7 +15,6 @@ import socket
 import inspect
 import pkgutil
 import logging
-import weakref
 import importlib
 import traceback
 from collections import OrderedDict
@@ -352,7 +351,7 @@ class DccClient(BaseClient):
                 break
         if client_found:
             return
-        dcc._CLIENTS[tool_id] = weakref.ref(client)
+        dcc._CLIENTS[tool_id] = client
 
     @classmethod
     def create_and_connect_to_server(cls, tool_id, *args, **kwargs):

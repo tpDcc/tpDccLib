@@ -7,6 +7,8 @@ Module that contains abstract implementation for DCC menus
 
 from __future__ import print_function, division, absolute_import
 
+from tpDcc.libs.python import decorators
+
 
 class AbstractMenu(object):
     def __init__(self, name='AbstractMenu'):
@@ -15,6 +17,7 @@ class AbstractMenu(object):
         self._name = name
 
     @staticmethod
+    @decorators.abstractmethod
     def create_category(category_name, category_items, parent_menu):
         """
         Creates a new category on the given menu. If not menu given this menu is used
@@ -26,6 +29,7 @@ class AbstractMenu(object):
 
         raise NotImplementedError('abstract DCC menu function create_category() not implemented!')
 
+    @decorators.abstractmethod
     def create_menu(self, file_path=None, parent_menu=None):
         """
         Creates a new DCC menu

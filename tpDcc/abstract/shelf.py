@@ -7,6 +7,8 @@ Module that contains abstract implementation for DCC shelves
 
 from __future__ import print_function, division, absolute_import
 
+from tpDcc.libs.python import decorators
+
 
 class AbstractShelf(object):
 
@@ -26,6 +28,7 @@ class AbstractShelf(object):
         self._category_menu = None
 
     @staticmethod
+    @decorators.abstractmethod
     def add_menu_item(parent, label, command='', icon=''):
         """
         Adds a new item with the given attributes to the shelf
@@ -39,6 +42,7 @@ class AbstractShelf(object):
         raise NotImplementedError('abstract DCC shelf function add_menu_item() not implemented!')
 
     @staticmethod
+    @decorators.abstractmethod
     def add_sub_menu(parent, label, icon=None):
         """
         Adds a sub menu item with the given label and icon to the given parent popup menu
@@ -50,6 +54,7 @@ class AbstractShelf(object):
 
         raise NotImplementedError('abstract DCC shelf function add_sub_menu() not implemented!')
 
+    @decorators.abstractmethod
     def create(self, delete_if_exists=True):
         """
         Creates a new shelf
@@ -57,6 +62,7 @@ class AbstractShelf(object):
 
         raise NotImplementedError('abstract DCC shelf function create() not implemented!')
 
+    @decorators.abstractmethod
     def build(self, shelf_file):
         """
         Builds shelf from JSON file
@@ -67,6 +73,7 @@ class AbstractShelf(object):
 
         raise NotImplementedError('abstract DCC shelf function build() not implemented!')
 
+    @decorators.abstractmethod
     def set_as_active(self, delete_if_exists=True):
         """
         Sets this shelf as active shelf in current DCC session

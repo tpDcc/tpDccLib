@@ -31,13 +31,12 @@ def client(key=None, only_clients=False):
         else:
             client = _CLIENTS[list(_CLIENTS.keys())[0]]
 
-    if not client or not client():
+    if not client:
         if only_clients:
             return None
         return dcc
 
-    # Clients are stored as weakrefs
-    return client()
+    return client
 
 
 def clients():
@@ -5501,10 +5500,30 @@ def get_start_frame():
 
 
 @dcc.reroute
+def set_start_frame(start_frame):
+    """
+    Sets current start frame
+    :param start_frame: int
+    """
+
+    raise NotImplementedError()
+
+
+@dcc.reroute
 def get_end_frame():
     """
     Returns current end frame
     :return: int
+    """
+
+    raise NotImplementedError()
+
+
+@dcc.reroute
+def set_end_frame(end_frame):
+    """
+    Sets current end frame
+    :param end_frame: int
     """
 
     raise NotImplementedError()

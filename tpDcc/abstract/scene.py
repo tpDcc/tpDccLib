@@ -8,43 +8,17 @@ Module that contains DCC scene abstract class implementation
 from __future__ import print_function, division, absolute_import
 
 from tpDcc import dcc
-from tpDcc.libs.python import python
+from tpDcc.dcc import sceneobject
+from tpDcc.libs.python import python, decorators
 
 
 class AbstractScene(object):
-
-    _instance = None
-
-    def __init__(self):
-        super(AbstractScene, self).__init__()
-
-    # ==============================================================================================
-    # CLASS FUNCTIONS
-    # ==============================================================================================
-
-    @classmethod
-    def instance(cls):
-        """
-        Returns wrapped instance object if already exists. If not, new scene instance is created and returned
-        :return: AbstractScene
-        """
-
-        if not cls._instance:
-            cls._instance = cls()
-        return cls._instance
-
-    @classmethod
-    def clear_instance(cls):
-        """
-        Clears already created scene instance
-        """
-
-        cls._instance = None
 
     # ==============================================================================================
     # ABSTRACT FUNCTIONS
     # ==============================================================================================
 
+    @decorators.abstractmethod
     def _dcc_objects(self, from_selection=False, wildcard='', object_type=None):
         """
         Internal function that returns DCC objects from current scene
@@ -56,6 +30,7 @@ class AbstractScene(object):
 
         raise NotImplementedError('Abstract Scene _dcc_objects function not implemented!')
 
+    @decorators.abstractmethod
     def _rename_dcc_objects(self, dcc_native_objects, names, display=True):
         """
         Rename given DCC objects with the given new names
@@ -79,7 +54,7 @@ class AbstractScene(object):
         :return: list(SceneObject)
         """
 
-        return [tp.SceneObject(self, obj) for obj in self._dcc_objects(
+        return [sceneobject.SceneObject(self, obj) for obj in self._dcc_objects(
             from_selection=False, wildcard=wildcard, object_type=object_type)]
 
     def selected_objects(self, wildcard='', object_type=None):
@@ -90,7 +65,7 @@ class AbstractScene(object):
         :return: list(SceneObject)
         """
 
-        return [tp.SceneObject(self, obj) for obj in self._dcc_objects(
+        return [sceneobject.SceneObject(self, obj) for obj in self._dcc_objects(
             from_selection=True, wildcard=wildcard, object_type=object_type)]
 
     def root_object(self):
@@ -144,7 +119,7 @@ class AbstractScene(object):
         if not dcc_object:
             return None
 
-        return tp.SceneObject(self, dcc_object)
+        return sceneobject.SceneObject(self, dcc_object)
 
     def find_object_by_id(self, unique_id):
         """
@@ -157,7 +132,7 @@ class AbstractScene(object):
         if not dcc_object:
             return None
 
-        return tp.SceneObject(self, dcc_object)
+        return sceneobject.SceneObject(self, dcc_object)
 
     # ==============================================================================================
     # INTERNAL
